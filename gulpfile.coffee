@@ -66,7 +66,6 @@ gulp.task 'compile:coffee', ->
     .pipe $.sourcemaps.init()
     .pipe $.coffee
       bare: true
-    .pipe $.uglify()
     .pipe $.sourcemaps.write()
     .pipe gulp.dest('js')
 
@@ -84,7 +83,6 @@ gulp.task 'compile:coffee:production', ['clean:js'], ->
   gulp.src 'coffee/**/*.coffee'
     .pipe $.coffee
       bare: true
-    .pipe $.uglify()
     .pipe gulp.dest('js')
 
 gulp.task 'compile:sass:production', ['clean:css'], ->

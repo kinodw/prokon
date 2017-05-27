@@ -1,6 +1,7 @@
 {shell, webFrame} = require 'electron'
 MdsMenu           = require './js/classes/mds_menu'
 clsMdsRenderer    = require './js/classes/mds_renderer'
+createValidator   = require 'codemirror-textlint'
 MdsRenderer       = new clsMdsRenderer
 MdsRenderer.requestAccept()
 
@@ -11,6 +12,7 @@ require 'codemirror/mode/xml/xml'
 require 'codemirror/mode/markdown/markdown'
 require 'codemirror/mode/gfm/gfm'
 require 'codemirror/addon/edit/continuelist'
+require "codemirror/addon/lint/lint"
 
 class EditorStates
   rulers: []
@@ -135,14 +137,65 @@ class EditorStates
 
 loadingState = 'loading'
 
+
+
+# textlint rules setting
+
+noAbusage = require 'textlint-rule-ja-no-abusage'
+mixedPeriod = require 'textlint-rule-ja-no-mixed-period'
+successiveWord = require 'textlint-rule-ja-no-successive-word'
+weakPhrase = require 'textlint-rule-ja-no-weak-phrase'
+maxComma = require 'textlint-rule-max-comma'
+kanjiContinuousLen = require 'textlint-rule-max-kanji-continuous-len'
+maxTen = require 'textlint-rule-max-ten'
+noDoubleNegativeJa = require 'textlint-rule-no-double-negative-ja'
+noDoubledConjunction = require 'textlint-rule-no-doubled-conjunction'
+noDoubledConjunctiveParticleGa = require 'textlint-rule-no-doubled-conjunctive-particle-ga'
+noDoubledJoshi = require 'textlint-rule-no-doubled-joshi'
+noDroppingTheRa = require 'textlint-rule-no-dropping-the-ra'
+noExclamationQuestionMark = require 'textlint-rule-no-exclamation-question-mark'
+noHankakuKana = require 'textlint-rule-no-hankaku-kana'
+noMixDearuDesumasu = require 'textlint-rule-no-mix-dearu-desumasu'
+noNfd = require 'textlint-rule-no-nfd'
+noStartDuplicatedConjunction = require 'textlint-rule-no-start-duplicated-conjunction'
+
+validator = createValidator({
+  rules: {
+    'noAbusage' : noAbusage,
+    'mixedPeriod' : mixedPeriod,
+    'successiveWord' : successiveWord,
+    'weakPhrase' : weakPhrase,
+    'maxComma' : maxComma,
+    'kanjiContinuousLen' : kanjiContinuousLen,
+    'maxTen' : maxTen,
+    'noDoubledNegativeJa' : noDoubleNegativeJa,
+    'noDoubledConjunction' : noDoubledConjunction,
+    'noDoubledConjunctiveParticleGa' : noDoubledConjunctiveParticleGa,
+    'noDoubledJoshi' : noDoubledJoshi,
+    'noDroppingTheRa' : noDroppingTheRa,
+    'noExclamationQuestionMark' : noExclamationQuestionMark,
+    'noHankakuKana' : noHankakuKana,
+    'noMixDearuDesumasu' : noMixDearuDesumasu,
+    'noNfd' : noNfd,
+    'noStartDuplicatedConjunction' : noStartDuplicatedConjunction
+  }
+  });
+
+
 do ->
   editorStates = new EditorStates(
     CodeMirror.fromTextArea($('#editor')[0],
+      # gfm : Github Flavored Mode
       mode: 'gfm'
-      theme: 'marp'
+      #theme: 'base16-light'
       lineWrapping: true
-      lineNumbers: false
+      lineNumbers: true
       dragDrop: false
+      gutters: ["CodeMirror-lint-markers"]
+      lint: {
+         "getAnnotations": validator,
+         "async": true
+      }
       extraKeys:
         Enter: 'newlineAndIndentContinueMarkdownList'
     ),
