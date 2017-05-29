@@ -108,6 +108,13 @@ class EditorStates
 
     @codeMirror.on 'cursorActivity', (cm) => window.setTimeout (=> @refreshPage()), 5
 
+    # @codeMirror.use(require('markdown-it-video', {
+    #   youtube: { width: 640, height: 390 },
+    #   vimeo: { width: 500, height: 281 },
+    #   vine: { width: 600, height: 600, embed: 'simple' },
+    #   prezi: { width: 550, height: 400 }
+    # }))
+
   setImageDirectory: (directory) =>
     if @previewInitialized
       @preview.send 'setImageDirectory', directory
@@ -295,6 +302,7 @@ do ->
 
     .on 'setImageDirectory', (directories) -> editorStates.setImageDirectory directories
 
+# send text to save to main process and reload
     .on 'save', (fname, triggers = {}) ->
       MdsRenderer.sendToMain 'writeFile', fname, editorStates.codeMirror.getValue(), triggers
       MdsRenderer.sendToMain 'initializeState', fname

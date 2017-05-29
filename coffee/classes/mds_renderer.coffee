@@ -4,6 +4,7 @@ module.exports = class MdsRenderer
   id: null
   _accepted: false
 
+# event is pushed to this list
   events: {}
 
   constructor: ->

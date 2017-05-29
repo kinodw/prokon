@@ -14,13 +14,13 @@ module.exports = class MdsWindow
   @appWillQuit: false
 
   @defOptions: () ->
-    title:  'Marp'
+    title:  'Electron'
     show:   false
     x:      global.marp.config.get 'windowPosition.x'
     y:      global.marp.config.get 'windowPosition.y'
     width:  global.marp.config.get 'windowPosition.width'
     height: global.marp.config.get 'windowPosition.height'
-    icon:   Path.join(__dirname, '/../../images/marp.png')
+    # icon:   Path.join(__dirname, '/../../images/marp.png')
 
   browserWindow: null
   path: null
@@ -77,22 +77,23 @@ module.exports = class MdsWindow
           MdsWindow.appWillQuit = false
           return
 
-        if @changed
-          e.preventDefault()
-          dialog.showMessageBox @browserWindow,
-            type: 'question'
-            buttons: ['Yes', 'No', 'Cancel']
-            title: 'Marp'
-            message: 'Are you sure?'
-            detail: "#{@getShortPath()} has been modified. Do you want to save the changes?"
-            cancelId: 2
-          , (result) =>
-            # Wrap by setTimeout to avoid app termination unexpectedly on Linux.
-            switch result
-              when 0 then setTimeout (=> @trigger 'save', 'forceClose'), 0
-              when 1 then setTimeout (=> @trigger 'forceClose'), 0
-              else
-                MdsWindow.appWillQuit = false
+# when close window, wawrning dialog is shown
+        # if @changed
+        #   e.preventDefault()
+        #   dialog.showMessageBox @browserWindow,
+        #     type: 'question'
+        #     buttons: ['Yes', 'No', 'Cancel']
+        #     title: 'Marp'
+        #     message: 'Are you sure?'
+        #     detail: "#{@getShortPath()} has been modified. Do you want to save the changes?"
+        #     cancelId: 2
+        #   , (result) =>
+        #     # Wrap by setTimeout to avoid app termination unexpectedly on Linux.
+        #     switch result
+        #       when 0 then setTimeout (=> @trigger 'save', 'forceClose'), 0
+        #       when 1 then setTimeout (=> @trigger 'forceClose'), 0
+        #       else
+        #         MdsWindow.appWillQuit = false
 
       bw.on 'closed', =>
         @browserWindow = null
