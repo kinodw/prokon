@@ -13,6 +13,38 @@
 
   <body>
     <div class="window">
+    <header class="toolbar toolbar-header">
+       <h1 class="title">Header</h1>
+        <div class="toolbar-actions">
+          <div class="btn-group">
+            <button class="btn btn-default">
+              <span class="icon icon-home"></span>
+            </button>
+            <button class="btn btn-default">
+              <span class="icon icon-folder"></span>
+            </button>
+            <button class="btn btn-default active">
+              <span class="icon icon-cloud"></span>
+            </button>
+            <button class="btn btn-default">
+              <span class="icon icon-popup"></span>
+            </button>
+            <button class="btn btn-default">
+              <span class="icon icon-shuffle"></span>
+            </button>
+          </div>
+
+          <button class="btn btn-default">
+            <span class="icon icon-home icon-text"></span>
+            Filters
+          </button>
+
+          <button class="btn btn-default btn-dropdown pull-right">
+            <span class="icon icon-megaphone"></span>
+          </button>
+          <span id="page-indicator"></span>
+      </div>
+    </header>
       <div class="window-content">
         <div class="pane-group">
           <div class="pane markdown">
@@ -28,7 +60,9 @@
       </div>
       <footer class="toolbar toolbar-footer">
         <div class="toolbar-actions">
-          <span id="page-indicator"></span>
+          <button type="button" id="presentation" name="aaa" value="aaa">
+            <font size="4">presen</font></font>
+          </button>
          <!--  <div class="btn-group pull-right disabled" id="preview-modes">
             <button class="btn btn-default viewmode-btn" id="preview-mode-markdown" data-viewmode="markdown" title="Markdown">
               <span class="icon icon-pencil"></span>

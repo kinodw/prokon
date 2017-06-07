@@ -18,6 +18,8 @@
     body.slide-view
       @content
 
+
+
 // ===== Slide CSS common =====
 
 :root
@@ -34,6 +36,11 @@ $previewHeight: calc(var(--screen-height) - var(--preview-margin) * 2)
 $previewWidthPx: calc(1px * #{$previewWidth})
 $previewHeightPx: calc(1px * #{$previewHeight})
 
+$presenDevPreviewWidth: calc(var(--screen-width) - var(--preview-margin) * 15)
+$presenDevPreviewHeight: calc(var(--screen-height) - var(--preview-margin) * 15)
+$presenDevPreviewWidthPx: calc(1px * #{$presenDevPreviewWidth})
+$presenDevPreviewHeightPx: calc(1px * #{$presenDevPreviewHeight})
+
 html, body
   height: 100%
 
@@ -46,6 +53,7 @@ img.emoji
   margin: 0 .05em 0 .1em
   vertical-align: -0.1em
   background-color: transparent !important
+
 
 #container, .slide_wrapper, .slide
   box-sizing: border-box
@@ -187,3 +195,20 @@ img.emoji
 
       &:first-child
         margin-top: 0 !important
+
+  &.presen-dev
+    #container
+      padding: $previewMarginPx 0
+
+    .slide_wrapper
+      width: $presenDevPreviewWidthPx
+      height: calc(#{$presenDevPreviewWidthPx} * var(--slide-height) / var(--slide-width))
+      margin: $previewMarginPx auto 0 auto !important
+
+      &:first-child
+        margin-top: 0 !important
+
+      > .slide
+        transform: scale(calc(#{$presenDevPreviewWidth} / var(--slide-width)))
+
+

@@ -45,6 +45,7 @@ module.exports = class MdsMarkdown
       size: 'svg'
       ext: '.svg'
 
+# create MarkdownInt object and apply plugins
   @createMarkdownIt: (opts, plugins) ->
     md = markdownIt(opts)
     md.use(require(plugName), plugOpts ? {}) for plugName, plugOpts of plugins
@@ -53,7 +54,8 @@ module.exports = class MdsMarkdown
   @generateAfterRender: ($) ->
     (md) ->
       mdElm = $("<div>#{md.parsed}</div>")
-
+      # set background image
+      #bgが単語としてalt属性の値に現れるp直下のimg要素を対象とする
       mdElm.find('p > img[alt~="bg"]').each ->
         $t  = $(@)
         p   = $t.parent()

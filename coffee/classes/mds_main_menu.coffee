@@ -10,6 +10,7 @@ module.exports = class MdsMainMenu
   menu: null
 
   @useAppMenu: process.platform is 'darwin'
+  # ウインドウごとのメニューを管理
   @instances: new Map
   @currentMenuId: null
 
@@ -33,6 +34,7 @@ module.exports = class MdsMainMenu
       MdsMainMenu.currentMenuId = @window_id
       @applyMenu() if MdsMainMenu.useAppMenu
 
+    # ウィンドウのフォーカスが外れた場合
     @window.on 'blur', resetAppMenu
 
     @window.on 'closed', =>
@@ -40,12 +42,14 @@ module.exports = class MdsMainMenu
       resetAppMenu()
 
   applyMenu: () =>
-    if MdsMainMenu.useAppMenu
+    if MdsMainMenu.useAppMenu # macだったら
+      # このインスタンスのウインドウIDが現在使用されているウインドウのIDであったら
       if @window_id == MdsMainMenu.currentMenuId
         @menu.object.setAppMenu(@menu.options)
     else
       @menu.object.setMenu(@window, @menu.options) if @window?
 
+  # すべてのウインドウのメニューを更新
   @updateMenuToAll: () =>
     @instances.forEach (m) -> m.updateMenu()
 
@@ -157,6 +161,13 @@ module.exports = class MdsMainMenu
               label: 'Toggle &Full Screen'
               accelerator: do -> if process.platform == 'darwin' then 'Ctrl+Command+F' else 'F11'
               role: 'togglefullscreen'
+            }
+            {
+              label: 'Presentation'
+              click: =>
+                console.log 'send presentation'
+                @window.mdsWindow.browserWindow.webContents.send('presentation');
+
             }
           ]
         }

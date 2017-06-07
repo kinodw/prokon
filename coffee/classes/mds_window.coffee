@@ -35,10 +35,17 @@ module.exports = class MdsWindow
 
   constructor: (fileOpts = {}, @options = {}) ->
     @path = fileOpts?.path || null
-    @viewMode = global.marp.config.get('viewMode')
+
+    # @viewMode = global.marp.config.get('viewMode')
+    @viewMode = 'screen'
 
     @browserWindow = do =>
-      bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options)
+      # 初期設定options と @options をマージして初期化、ウインドウID設定
+      bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options,
+      {
+      'titleBarStyle': 'hidden', #ヘッダーバーを透明にし、ボタンだけ表示
+      'acceptFirstMouse': true
+      })
       @_window_id = bw.id
 
       loadCmp = (details) =>
@@ -46,7 +53,11 @@ module.exports = class MdsWindow
           @_watchingResources.delete(details.id)
           @updateResourceState()
         , 500
-
+      # about webRequest
+      # details object describes request
+      # The filter object has a urls property which is an Array of URL patterns-
+      # -that will be used to filter out the requests that do not match the URL patterns.
+      # If the filter is omitted then all requests will be matched.
       bw.webContents.session.webRequest.onCompleted loadCmp
       bw.webContents.session.webRequest.onErrorOccurred loadCmp
       bw.webContents.session.webRequest.onBeforeRequest (details, callback) =>
@@ -77,7 +88,7 @@ module.exports = class MdsWindow
           MdsWindow.appWillQuit = false
           return
 
-# when close window, wawrning dialog is shown
+        # when close window, wawrning dialog is shown
         # if @changed
         #   e.preventDefault()
         #   dialog.showMessageBox @browserWindow,
@@ -108,6 +119,8 @@ module.exports = class MdsWindow
       bw.on 'maximize', updateWindowPosition
       bw.on 'unmaximize', updateWindowPosition
 
+
+
       bw.mdsWindow = @
       bw
 
@@ -123,19 +136,25 @@ module.exports = class MdsWindow
       else
         txt.toString()
 
+      # ignoreしない場合 fileName を fileHistry　にpushし、すべてのウインドウのメニュー更新
       unless options?.ignoreRecent
         MdsFileHistory.push fname
         MdsMainMenu.updateMenuToAll()
 
+      # ウインドウが存在し、かつ、overrideまたはウインドウのバッファが空、であるとき
       if mdsWindow? and (options?.override or mdsWindow.isBufferEmpty())
         mdsWindow.trigger 'load', buf, fname
+
+      # ウインドウ初期化　param = fileOpts　で fileOpts = { path: fname, buffer: buf }
+      # 第二引数はなし -> @options = {}
       else
         new MdsWindow { path: fname, buffer: buf }
 
   loadFromFile: (fname, options = {}) => MdsWindow.loadFromFile fname, @, options
 
   trigger: (evt, args...) =>
-    @events[evt]?.apply(@, args)
+    @events[evt]?.apply(@, args) # 呼ばれる関数内のthisを第一引数で指定したものに変えている(それぞれのMdsWindow)
+
 
   events:
     previewInitialized: ->

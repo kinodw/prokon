@@ -1,3 +1,4 @@
+ipc = require('electron').ipcRenderer
 {shell, webFrame} = require 'electron'
 MdsMenu           = require './js/classes/mds_menu'
 clsMdsRenderer    = require './js/classes/mds_renderer'
@@ -44,14 +45,19 @@ class EditorStates
       { label: 'Services', role: 'services', submenu: [], platform: 'darwin' }
     ]
 
+  # ページカウント後、webviewへそれを送信
   refreshPage: (rulers) =>
+    # EditorStatesクラスの変数rulersリストへ入れて、一旦ページを１にする
     @rulers = rulers if rulers?
     page    = 1
+    console.log @rulers
 
+    # rulerLineには'---'の行位置が記されており、それとエディタ上のカーソル位置を比較してpageを決める
     lineNumber = @codeMirror.getCursor().line || 0
     for rulerLine in @rulers
       page++ if rulerLine <= lineNumber
 
+    # ruler計算後にページの増減があった場合、正しいページ情報をwebviewへ送信
     if @currentPage != page
       @currentPage = page
       @preview.send 'currentPage', @currentPage if @previewInitialized
@@ -65,6 +71,7 @@ class EditorStates
         # [Note] https://github.com/electron/electron/issues/4882
         $(@preview.shadowRoot).append('<style>object{min-width:0;min-height:0;}</style>')
 
+      # webview からの通信を受け取る 'ipc-message'
       .on 'ipc-message', (ev) =>
         e = ev.originalEvent
 
@@ -82,7 +89,7 @@ class EditorStates
               $('body').addClass 'initialized-slide'
           else
             MdsRenderer._call_event e.channel, e.args...
-
+      # urlをクリックして新しいウインドウが開かれる時
       .on 'new-window', (e) =>
         e.preventDefault()
         @openLink e.originalEvent.url
@@ -90,7 +97,7 @@ class EditorStates
       .on 'did-finish-load', (e) =>
         @preview.send 'currentPage', 1
         @preview.send 'setImageDirectory', @_imageDirectory
-        @preview.send 'render', @codeMirror.getValue()
+        @preview.send 'render', @codeMirror.getValue()  # render イベント送信でruler確認してページ切り替わり
 
   openLink: (link) =>
     shell.openExternal link if /^https?:\/\/.+/.test(link)
@@ -107,13 +114,6 @@ class EditorStates
       MdsRenderer.sendToMain 'setChangedStatus', true if !@_lockChangedStatus
 
     @codeMirror.on 'cursorActivity', (cm) => window.setTimeout (=> @refreshPage()), 5
-
-    # @codeMirror.use(require('markdown-it-video', {
-    #   youtube: { width: 640, height: 390 },
-    #   vimeo: { width: 500, height: 281 },
-    #   vine: { width: 600, height: 600, embed: 'simple' },
-    #   prezi: { width: 550, height: 400 }
-    # }))
 
   setImageDirectory: (directory) =>
     if @previewInitialized
@@ -190,6 +190,7 @@ validator = createValidator({
 
 
 do ->
+  slideHTML = ""
   editorStates = new EditorStates(
     CodeMirror.fromTextArea($('#editor')[0],
       # gfm : Github Flavored Mode
@@ -302,7 +303,7 @@ do ->
 
     .on 'setImageDirectory', (directories) -> editorStates.setImageDirectory directories
 
-# send text to save to main process and reload
+    # send text to save to main process and reload
     .on 'save', (fname, triggers = {}) ->
       MdsRenderer.sendToMain 'writeFile', fname, editorStates.codeMirror.getValue(), triggers
       MdsRenderer.sendToMain 'initializeState', fname
@@ -315,6 +316,8 @@ do ->
           editorStates.preview.send 'setClass', 'slide-view screen'
         when 'list'
           editorStates.preview.send 'setClass', 'slide-view list'
+        when 'presen-dev'
+          editorStates.preview.send 'setClass', 'slide-view presen-dev'
 
       $('#preview-modes').removeClass('disabled')
       $('.viewmode-btn[data-viewmode]').removeClass('active')
@@ -333,6 +336,62 @@ do ->
     .on 'setTheme', (theme) -> editorStates.updateGlobalSetting '$theme', theme
     .on 'themeChanged', (theme) -> MdsRenderer.sendToMain 'themeChanged', theme
     .on 'resourceState', (state) -> loadingState = state
+##################################################
+  webview = document.querySelector('#preview')
+  # simple presentation mode on!
+  # $('#presentation').on 'click', () =>
+  #   webview.webkitRequestFullScreen()
+
+  # $('#presentation').on 'click', () =>
+  #   $('.pane.markdown').toggle()
+  #   ipc.send('Presentation')
+
+  # ipc.on 'initialize' () =>
+
+
+  # ipc.on "presentation", () ->
+  #   console.log "recieve presentation"
+  #   ipc.send "textSend", editorStates.codeMirror.getValue()
+  #   console.log 'send textSend'
+
+  $('#presentation').on 'click', () =>
+    $('.pane.markdown').toggle()
+    $('.toolbar-footer').toggle()
+    webview.send 'requestSlideInfo'
+    console.log 'send requestSlideInfo'
+
+  webview.addEventListener 'ipc-message', (event) =>
+     switch event.channel
+       when "sendSlideInfo"   # webview からスライド情報を受信
+        slideInfo = event.args[0]
+        console.log 'receive sendSlideInfo'
+        console.log slideInfo
+        ipc.send 'textSend', slideInfo
+        console.log 'send textSend'
+        break
+
+
+       when "requestSlideHTML"
+        webview.send 'setSlide', slideHTML
+        console.log 'send setSlide'
+        break
+
+  ipc.on 'presenDevInitialize', (e, text) =>
+      console.log 'receive presenDevInitialize'
+      console.log text
+      slideHTML = text
+
+  ipc.on 'goToPage', (e, page) =>
+    console.log page
+    webview.send 'goToPage', page
+
+      # webview の準備ができてない
+      # webview.send 'setSlide', text
+      # console.log 'send setSlide'
+  # ipc.on 'initialize', () =>
+  #   $('.pane.markdown').html()
+###################################################
+
 
   # Initialize
   editorStates.codeMirror.focus()

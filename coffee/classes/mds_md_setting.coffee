@@ -1,6 +1,7 @@
 extend  = require 'extend'
 path    = require 'path'
 
+# page option setting
 module.exports = class MdsMdSetting
   @generalTransfomer:
     bool: (v) -> v is 'true'
@@ -97,10 +98,14 @@ module.exports = class MdsMdSetting
       return convertFunc if prop is duckTypeProp
     null
 
+  # 有効プロパティ
   @validProps:
     global: ['width', 'height', 'size', 'theme']
     page:   ['page_number', 'template', 'footer', 'prerender']
 
+  # page指定があればpageの有効プロパティを参照し、propが存在するかどうか確認
+  # pageが0以下ならglobalの有効プロパティを参照し、propが存在するかどうか確認
+  # 上記において、存在すれば true  存在しなければ false
   @isValidProp: (page, prop) =>
     target = if page > 0 then 'page' else 'global'
     prop in MdsMdSetting.validProps[target]
@@ -108,6 +113,8 @@ module.exports = class MdsMdSetting
   constructor: () ->
     @_settings = []
 
+  # 有効プロパティでなければ return false
+  #
   set: (fromPage, prop, value, noFollowing = false) =>
     return false unless MdsMdSetting.isValidProp(fromPage, prop)
 
