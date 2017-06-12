@@ -17,6 +17,7 @@ ipc       = electron.ipcMain
 slideInfo = ""
 presenDevWin = null
 win = null
+mickrWin = null
 
 # Initialize config
 global.marp.config.initialize()
@@ -56,6 +57,16 @@ app.on 'open-file', (e, path) ->
   MdsWindow.loadFromFile path, null
 
 app.on 'ready', ->
+  display = electron.screen.getPrimaryDisplay()
+  mickrWin = new BrowserWindow {
+    width: display.workAreaSize.width,
+    height: display.workAreaSize.height,
+    transparent: true,
+    frame: false
+  }
+  mickrWin.setIgnoreMouseEvents(true)
+  mickrWin.isAlwaysOnTop(true)
+  mickrWin.loadURL "file://#{__dirname}/../land.html"
   global.marp.mainMenu = new MainMenu
     development: global.marp.development
 
