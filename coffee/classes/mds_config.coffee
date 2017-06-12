@@ -20,8 +20,8 @@ class MdsConfig
     windowPosition:
       x: undefined
       y: undefined
-      width: 1000
-      height: 420
+      width: 1200
+      height: 800
       maximized: false
 
   constructor: ->
@@ -33,14 +33,14 @@ class MdsConfig
   initialize: (conf = @configFile) => @load(conf, true)
 
   load: (conf = @configFile, initialize = false) =>
-    try
-      fs.accessSync(conf, fs.F_OK)
-      @config = extend(true, {}, MdsConfig.initialConfig, JSON.parse(fs.readFileSync(conf).toString()))
-    catch
-      if initialize
-        console.log 'Failed reading config file. Config initialized.'
-        @config = MdsConfig.initialConfig
-        @save()
+    # try
+    #   fs.accessSync(conf, fs.F_OK)
+    #   @config = extend(true, {}, MdsConfig.initialConfig, JSON.parse(fs.readFileSync(conf).toString()))
+    # catch
+    #   if initialize
+    #     console.log 'Failed reading config file. Config initialized.'
+    @config = MdsConfig.initialConfig
+    @save()
 
   save: (json = @config) =>
     try

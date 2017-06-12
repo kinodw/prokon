@@ -57,6 +57,7 @@ app.on 'open-file', (e, path) ->
   MdsWindow.loadFromFile path, null
 
 app.on 'ready', ->
+  # mickr のウインドウ
   display = electron.screen.getPrimaryDisplay()
   mickrWin = new BrowserWindow {
     width: display.workAreaSize.width,
@@ -66,8 +67,11 @@ app.on 'ready', ->
   }
 
   mickrWin.setIgnoreMouseEvents(true)
-  mickrWin.isAlwaysOnTop(true)
+  mickrWin.setAlwaysOnTop(true)
   mickrWin.loadURL "file://#{__dirname}/../land.html"
+  #mickrWin.webContents.openDevTools()
+
+  # アプリのウインドウ
   global.marp.mainMenu = new MainMenu
     development: global.marp.development
 
@@ -114,7 +118,8 @@ ipc.on 'textSend', (e, text) =>
     dataString += data.toString()
 
   py.stdout.on 'end', () =>
-    console.log dataString
+     console.log dataString
+     mickrWin.send 'show', dataString
 
   py.stdin.write(JSON.stringify(data));
   py.stdin.end()
