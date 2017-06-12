@@ -14,34 +14,33 @@
   <body>
     <div class="window">
     <header class="toolbar toolbar-header">
-       <h1 class="title">Header</h1>
+       <h1 class="title">Electron</h1>
         <div class="toolbar-actions">
-          <div class="btn-group">
+<!--           <div class="btn-group">
             <button class="btn btn-default">
-              <span class="icon icon-home"></span>
+              <span class="active icon icon-doc-landscape"></span>
             </button>
             <button class="btn btn-default">
-              <span class="icon icon-folder"></span>
+              <span class="icon icon-layout"></span>
             </button>
-            <button class="btn btn-default active">
-              <span class="icon icon-cloud"></span>
+          </div> -->
+          <div class="btn-group pull-right disabled" id="preview-modes">
+           <!--  <button class="btn btn-default viewmode-btn" id="preview-mode-markdown" data-viewmode="markdown" title="Markdown">
+              <span class="icon icon-pencil"></span>
+            </button> -->
+            <button class="btn btn-default viewmode-btn" id="preview-mode-screen" data-viewmode="screen" title="1:1 Slide">
+              <span class="icon icon-doc-landscape"></span>
             </button>
-            <button class="btn btn-default">
-              <span class="icon icon-popup"></span>
-            </button>
-            <button class="btn btn-default">
-              <span class="icon icon-shuffle"></span>
+            <button class="btn btn-default viewmode-btn" id="preview-mode-list" data-viewmode="list" title="Slide List">
+              <span class="icon icon-doc-text"></span>
             </button>
           </div>
 
-          <button class="btn btn-default">
-            <span class="icon icon-home icon-text"></span>
-            Filters
+          <button class="btn btn-default pdfexport-btn" id="pdf-export">
+            <span class="icon icon-export icon-text"></span>
+            PDF
           </button>
 
-          <button class="btn btn-default btn-dropdown pull-right">
-            <span class="icon icon-megaphone"></span>
-          </button>
           <span id="page-indicator"></span>
       </div>
     </header>

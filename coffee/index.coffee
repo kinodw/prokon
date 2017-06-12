@@ -124,6 +124,11 @@ class EditorStates
 
   insertImage: (filePath) => @codeMirror.replaceSelection("![](#{filePath.replace(/ /g, '%20')})\n")
 
+  #********************************TODO****************************************
+  insertVideo: (filePath) =>
+    console.log filePath
+  #****************************************************************************
+
   updateGlobalSetting: (prop, value) =>
     latestPos = null
 
@@ -213,6 +218,9 @@ do ->
   # View modes
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
 
+  # PDF Export button
+  $('#pdf-export').click -> ipc.send 'PdfExport'
+
   # File D&D
   $(document)
     .on 'dragover',  -> false
@@ -221,11 +229,14 @@ do ->
     .on 'drop',      (e) =>
       e.preventDefault()
       return false unless (f = e.originalEvent.dataTransfer?.files?[0])?
-
+      console.log f
       if f.type.startsWith('image')
         editorStates.insertImage f.path
       else if f.type.startsWith('text') || f.type is ''
         MdsRenderer.sendToMain 'loadFromFile', f.path if f.path?
+      else if f.type.startsWith('video')
+        editorStates.insertVideo f.path
+
       false
 
   # Splitter
@@ -369,7 +380,6 @@ do ->
         ipc.send 'textSend', slideInfo
         console.log 'send textSend'
         break
-
 
        when "requestSlideHTML"
         webview.send 'setSlide', slideHTML

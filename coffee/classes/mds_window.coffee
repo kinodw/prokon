@@ -121,6 +121,7 @@ module.exports = class MdsWindow
 
 
 
+
       bw.mdsWindow = @
       bw
 

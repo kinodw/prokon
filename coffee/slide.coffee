@@ -90,11 +90,11 @@ document.addEventListener 'DOMContentLoaded', ->
       $('#markdown').html(md.parsed)
 
       # youtube plugin replacement ex. @[youtube](https://~)
-      if url = $('.embed-responsive-item').attr('src')
-        console.log url
-        console.log url.indexOf("file:")
-        url = 'https:' + url
-        $('.embed-responsive-item').attr('src', url)
+      # if url = $('.embed-responsive-item').attr('src')
+      #   console.log url
+      #   console.log url.indexOf("file:")
+      #   url = 'https:' + url
+      #   $('.embed-responsive-item').attr('src', url)
 
       ipc.sendToHost 'rendered', md
       ipc.sendToHost 'rulerChanged', md.rulers if md.rulerChanged
@@ -145,7 +145,7 @@ document.addEventListener 'DOMContentLoaded', ->
       console.log 'receive requestSlideInfo'
       markdownBody = []
       $('.slide_wrapper').each (idx, elem) =>
-        markdownBody.push elem.outerHTML
+        markdownBody.push elem.outerHTML # <div class=slide_wrapper id=1> ...
 
       console.log markdownBody
 

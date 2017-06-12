@@ -82,12 +82,30 @@ ipc.on 'textSend', (e, text) =>
     nonHTML[idx] = nonHTML[idx].replace(/\s+/gi, "") # 空白の削除
     nonHTML[idx] = nonHTML[idx].substr(0, nonHTML[idx].length-1)  # 末尾にページ数が入るので、末尾を削除
 
-    console.log "text[#{idx}] = #{value}"
+  # htmlタグを含まない本文
   console.log nonHTML
+  # それぞれのスライドのテキストを結合し、リストに一つの要素として入れて
+  # 、それをpythonに渡す
+  nonHTML = nonHTML.join("")
+  console.log nonHTML
+  input = []
+  input.push(nonHTML)
 
-  # ここでpythonにslideInfoを渡し処理を行う
 
+  # python プロセス生成、そして結果を受け取る
+  spawn = require('child_process').spawn
+  py    = spawn('python', ["#{__dirname}/../compute_input.py"])
+  data = input
+  dataString = ''
 
+  py.stdout.on 'data', (data) =>
+    dataString += data.toString()
+
+  py.stdout.on 'end', () =>
+    console.log dataString
+
+  py.stdin.write(JSON.stringify(data));
+  py.stdin.end()
 
 # ipc.on 'requestSlideInfo', () =>
 #   console.log 'receive requestSlideInfo'
@@ -97,6 +115,9 @@ ipc.on 'goToPage', (e, page) =>
   console.log page
   win.browserWindow.webContents.send 'goToPage', page
 
+ipc.on 'PdfExport', () =>
+  console.log 'PDF Export'
+  win.trigger 'exportPdfDialog'
 # ipc.on 'Presentation', () =>
 #   presenDevWin = new MdsWindow
 #   presenDevWin.webContents.send 'initialize'

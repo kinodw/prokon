@@ -55,7 +55,8 @@ module.exports = class MdsPresenWindow extends MdsWindow
 
           bw.webContents.on 'did-finish-load', =>
             @_windowLoaded = true
-            @send 'setSplitter', global.marp.config.get('splitterPosition')
+            #@send 'setSplitter', global.marp.config.get('splitterPosition')
+            @send 'setSplitter', 0.65
             @send 'setEditorConfig', global.marp.config.get('editor')
             @trigger 'load', fileOpts?.buffer || '', @path
             bw.webContents.send 'presenDevInitialize', slide

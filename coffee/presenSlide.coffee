@@ -99,10 +99,11 @@ document.addEventListener 'DOMContentLoaded', ->
 
       $('#markdown').html(slideOuterHTML.join(' '))
 
+      # はじめのスライドの色を変えておき、そのページが選択されていることを示す
+
+
       # 押されたslide_wrapperのidを送信してページ遷移
       $('.slide_wrapper').on 'click', () ->
-        console.log $(this).attr('id')
-        clickedId = $(this).attr('id')
         # 選択されたスライドの色を変更し、　ページ遷移させる
         $('.slide_wrapper').css('backgroundColor', '')
         $(this).css('backgroundColor', '#ffe3b4')
