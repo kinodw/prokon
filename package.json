@@ -53,6 +53,7 @@
     "markdown-it-katex": "^2.0.1",
     "markdown-it-mark": "^2.0.0",
     "markdown-it-video": "^0.4.0",
+    "node-uuid": "^1.4.8",
     "path": "^0.12.7",
     "photon": "github:connors/photon",
     "textlint-rule-preset-ja-technical-writing": "^0.1.3",

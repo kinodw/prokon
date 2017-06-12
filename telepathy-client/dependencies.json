@@ -1,0 +1,6 @@
+{
+	"bson": "bson",
+	"EventEmitter": "EventEmitter",
+	"CryptoJS": "CryptoJS",
+	"uuid": "uuid"
+}
