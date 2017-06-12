@@ -60,18 +60,18 @@ app.on 'ready', ->
   # mickr のウインドウ
   display = electron.screen.getPrimaryDisplay()
   mickrWin = new BrowserWindow {
-    #width: display.workAreaSize.width,
-    #height: display.workAreaSize.height,
-    width:800,
-    height:600,
+    width: display.workAreaSize.width,
+    height: display.workAreaSize.height,
+    # width:800,
+    # height:600,
     transparent: true,
     frame: false
   }
 
-  #mickrWin.setIgnoreMouseEvents(true)
-  #mickrWin.setAlwaysOnTop(true)
+  mickrWin.setIgnoreMouseEvents(true)
+  mickrWin.setAlwaysOnTop(true)
   mickrWin.loadURL "file://#{__dirname}/../land.html"
-  mickrWin.webContents.openDevTools()
+ # mickrWin.webContents.openDevTools()
 
   # アプリのウインドウ
   global.marp.mainMenu = new MainMenu
