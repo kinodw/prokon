@@ -7,7 +7,6 @@ resolvePathFromMarp = (path = './') -> Path.resolve(__dirname, '../', path)
 document.addEventListener 'DOMContentLoaded', ->
   $ = window.jQuery = window.$ = require('jquery')
 
-
   do ($) ->
     # First, resolve Marp resources path
     $("[data-marp-path-resolver]").each ->

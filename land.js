@@ -22,7 +22,15 @@ document.addEventListener('DOMContentLoaded', (e) => {
     "from" : setting.id,
     "to"   : setting.to,
     "body" : {
-      "content" : "hello!"
+      "content" : "hello! index!"
+    }
+  });
+  // slide.htmlへ
+  client.send("" , {
+    "from" : setting.id,
+    "to"   : "slide",
+    "body" : {
+      "content" : "hello! slide!"
     }
   });
 });
