@@ -98,6 +98,13 @@
         "token": "Pad:9948"
       }
       const client = new MickrClient(setting);
+      client.send("", {
+        "from": setting.id,
+        "to" : "land",
+        "body": {
+          "content": "hello! land! i'm index"
+        }
+      })
 
 
     });

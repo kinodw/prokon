@@ -30,9 +30,17 @@
         "url": "ws://apps.wisdomweb.net:64260/ws/mik",
         "site": "test",
         "token": "Pad:9948"
-      }
+      };
       const client = new MickrClient(setting);
-    })
+
+      client.send("", {
+        "from": setting.id,
+        "to"  : "land",
+        "body": {
+          "content" : "hello! land!"
+        }
+      });
+    });
   </script>
   </body>
 </html>
