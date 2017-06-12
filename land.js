@@ -17,20 +17,22 @@ document.addEventListener('DOMContentLoaded', (e) => {
     console.log(data)
     sky.addCloud({text: data});
   });
-  // inde.htmlにメッセージ送信
-  client.send("" , {
-    "from" : setting.id,
-    "to"   : setting.to,
-    "body" : {
-      "content" : "hello! index!"
-    }
-  });
-  // slide.htmlへ
-  client.send("" , {
-    "from" : setting.id,
-    "to"   : "slide",
-    "body" : {
-      "content" : "hello! slide!"
-    }
+  client.on("morning", () =>{
+    // inde.htmlにメッセージ送信
+    client.send("" , {
+      "from" : setting.id,
+      "to"   : setting.to,
+      "body" : {
+        "content" : "hello! index!"
+      }
+    });
+    // slide.htmlへ
+    client.send("" , {
+      "from" : setting.id,
+      "to"   : "slide",
+      "body" : {
+        "content" : "hello! slide!"
+      }
+    });
   });
 });
