@@ -64,6 +64,7 @@ app.on 'ready', ->
     transparent: true,
     frame: false
   }
+
   mickrWin.setIgnoreMouseEvents(true)
   mickrWin.isAlwaysOnTop(true)
   mickrWin.loadURL "file://#{__dirname}/../land.html"
