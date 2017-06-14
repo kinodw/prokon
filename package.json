@@ -38,6 +38,7 @@
     "run-sequence": "^1.1.5"
   },
   "dependencies": {
+    "async": "^2.4.1",
     "codemirror": "^5.11.0",
     "codemirror-textlint": "^1.2.0",
     "extend": "^3.0.0",
@@ -48,6 +49,7 @@
     "jquery": "^3.0.0",
     "jquery-ui": "^1.12.1",
     "jschardet": "^1.4.1",
+    "jszip": "^3.1.3",
     "markdown-it": "^6.0.1",
     "markdown-it-emoji": "^1.1.0",
     "markdown-it-katex": "^2.0.1",
@@ -57,6 +59,7 @@
     "path": "^0.12.7",
     "photon": "github:connors/photon",
     "textlint-rule-preset-ja-technical-writing": "^0.1.3",
-    "twemoji": "github:twitter/twemoji#v2.2.1"
+    "twemoji": "github:twitter/twemoji#v2.2.1",
+    "xml2js": "^0.4.17"
   }
 }

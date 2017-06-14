@@ -193,7 +193,6 @@ validator = createValidator({
   }
   });
 
-
 do ->
   slideHTML = ""
   editorStates = new EditorStates(
