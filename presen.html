@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="./node_modules/codemirror/addon/lint/lint.css">
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stopWatch.css">
+       <script src="./TweenMax.js"></script>
+  <script src="./telepathy-client/lib/bson/bson.js"></script>
+  <script src="./telepathy-client/lib/crypto-js/md5.js"></script>
+  <script>EventEmitter = require('events').EventEmitter</script>
+  <script>uuid = require('node-uuid')</script>
+  <script src="./telepathy-client/telepathy-client.js"></script>
+   <script src="./module.js" ></script>
   </head>
 
   <body>
@@ -95,5 +102,23 @@
       });
 
     })();
+  </script>
+  <script>
+ document.addEventListener("DOMContentLoaded", function(event) {
+      const setting = {
+         "id": "presen",
+        "url": "ws://apps.wisdomweb.net:64260/ws/mik",
+        "site": "test",
+        "token": "Pad:9948"
+      }
+      const client = new MickrClient(setting);
+      client.send("", {
+        "to": "index",
+        "body":{
+          "content": "hello! index! i'm presen"
+        }
+      })
+
+    });
   </script>
 </html>
