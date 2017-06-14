@@ -10,14 +10,19 @@ MainMenu  = require './classes/mds_main_menu'
 {exist}   = require './classes/mds_file'
 electron  = require 'electron'
 ipc       = electron.ipcMain
-
-
+MickrWindow = require '../MickrWindow.js'
+Tray      = electron.Tray
+globalShortcut = electron.globalShortcut
+powerSaveBlocker = electron.powerSaveBlocker
 # app.commandLine.appendSwitch("--enable-experimental-web-platform-features");
 # about presentation
 slideInfo = ""
 presenDevWin = null
 win = null
 mickrWin = null
+
+tray = null;
+tray2 = null;
 
 # Initialize config
 global.marp.config.initialize()
@@ -58,20 +63,17 @@ app.on 'open-file', (e, path) ->
 
 app.on 'ready', ->
   # mickr のウインドウ
-  display = electron.screen.getPrimaryDisplay()
-  mickrWin = new BrowserWindow {
-    #width: display.workAreaSize.width,
-    #height: display.workAreaSize.height,
-    width:800,
-    height:600,
-    transparent: true,
-    frame: false
-  }
 
-  #mickrWin.setIgnoreMouseEvents(true)
-  #mickrWin.setAlwaysOnTop(true)
-  mickrWin.loadURL "file://#{__dirname}/../land.html"
-  mickrWin.webContents.openDevTools()
+  mickrWin = new MickrWindow()
+  mickrWin.activateMainWindows()
+  #/* メニューバー上のアイコンが押された場合の処理 */
+  tray = new Tray(Path.join __dirname, '../','lib', 'img', 'cloud_on.png')
+  tray.on 'click', (e) =>
+    mickrWin.switchShowMode(tray)
+
+  tray2 = new Tray(Path.join __dirname, '../','lib', 'img', 'ic_pause_black_24dp_2x.png')
+  tray2.on 'click', (e) =>
+    mickrWin.switchPause()
 
   # アプリのウインドウ
   global.marp.mainMenu = new MainMenu

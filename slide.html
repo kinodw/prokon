@@ -14,7 +14,7 @@
   <script src="./telepathy-client/lib/EventEmitter/EventEmitter.js"></script>
   <script src="./telepathy-client/lib/node-uuid/uuid.js"></script>
   <script src="./telepathy-client/telepathy-client.js"></script>
-   <script src="./module.js" ></script> -->
+   <script src="./module.js" ></script>
   </head>
   <body class="slide-view screen">
     <div id="container">
@@ -40,6 +40,8 @@
           "content" : "hello! land!"
         }
       });
+      let markdown = document.querySelector('#markdown')
+      setTimeout( console.log(markdown), 5000)
     });
   </script>
   </body>

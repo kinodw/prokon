@@ -926,6 +926,7 @@
         }
       });
       ipcRenderer.on('switch_pause', (e, pause) => {
+        console.log('press switch_pause')
         if(pause) {
           this.animator.pauseAll()
         } else {
