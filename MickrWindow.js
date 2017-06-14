@@ -141,6 +141,11 @@ class MickrWindow extends EventEmitter{
     }
   }
 
+  send(event, args) {
+    let w = this.getMainWindow();
+    w.webContents.send(event, args)
+  }
+
   switchPause(w) {
     this.pause = !this.pause;
     var w = this.getMainWindow();

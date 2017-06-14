@@ -1,0 +1,24 @@
+var electron, ipc;
+
+electron = require('electron');
+
+ipc = electron.ipcRenderer;
+
+document.addEventListener('DOMContentLoaded', function() {
+  var $;
+  $ = window.jQuery = window.$ = require('jquery');
+  ipc.send('requestSlideInfo', (function(_this) {
+    return function() {
+      return console.log('send requestSlideInfo');
+    };
+  })(this));
+  return ipc.on('sendSlideInfo', (function(_this) {
+    return function(ev, text) {
+      console.log('receive sendSlideInfo');
+      console.log(text);
+      return $('.markdown-body').html(text);
+    };
+  })(this));
+});
+
+//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJlc2VuLmpzIiwic291cmNlcyI6WyJwcmVzZW4uY29mZmVlIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLElBQUE7O0FBQUEsUUFBQSxHQUFXLE9BQUEsQ0FBUSxVQUFSOztBQUNYLEdBQUEsR0FBVyxRQUFRLENBQUM7O0FBR3BCLFFBQVEsQ0FBQyxnQkFBVCxDQUEwQixrQkFBMUIsRUFBOEMsU0FBQTtBQUM1QyxNQUFBO0VBQUEsQ0FBQSxHQUFJLE1BQU0sQ0FBQyxNQUFQLEdBQWdCLE1BQU0sQ0FBQyxDQUFQLEdBQVcsT0FBQSxDQUFRLFFBQVI7RUFDL0IsR0FBRyxDQUFDLElBQUosQ0FBUyxrQkFBVCxFQUE2QixDQUFBLFNBQUEsS0FBQTtXQUFBLFNBQUE7YUFDM0IsT0FBTyxDQUFDLEdBQVIsQ0FBWSx1QkFBWjtJQUQyQjtFQUFBLENBQUEsQ0FBQSxDQUFBLElBQUEsQ0FBN0I7U0FHQSxHQUFHLENBQUMsRUFBSixDQUFPLGVBQVAsRUFBd0IsQ0FBQSxTQUFBLEtBQUE7V0FBQSxTQUFDLEVBQUQsRUFBSyxJQUFMO01BQ3RCLE9BQU8sQ0FBQyxHQUFSLENBQVksdUJBQVo7TUFDQSxPQUFPLENBQUMsR0FBUixDQUFZLElBQVo7YUFDQSxDQUFBLENBQUUsZ0JBQUYsQ0FBbUIsQ0FBQyxJQUFwQixDQUF5QixJQUF6QjtJQUhzQjtFQUFBLENBQUEsQ0FBQSxDQUFBLElBQUEsQ0FBeEI7QUFMNEMsQ0FBOUMiLCJzb3VyY2VzQ29udGVudCI6WyJlbGVjdHJvbiA9IHJlcXVpcmUgJ2VsZWN0cm9uJ1xuaXBjICAgICAgPSBlbGVjdHJvbi5pcGNSZW5kZXJlclxuXG5cbmRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIgJ0RPTUNvbnRlbnRMb2FkZWQnLCAtPlxuICAkID0gd2luZG93LmpRdWVyeSA9IHdpbmRvdy4kID0gcmVxdWlyZSgnanF1ZXJ5JylcbiAgaXBjLnNlbmQgJ3JlcXVlc3RTbGlkZUluZm8nLCAoKSA9PlxuICAgIGNvbnNvbGUubG9nICdzZW5kIHJlcXVlc3RTbGlkZUluZm8nXG5cbiAgaXBjLm9uICdzZW5kU2xpZGVJbmZvJywgKGV2LCB0ZXh0KSA9PlxuICAgIGNvbnNvbGUubG9nICdyZWNlaXZlIHNlbmRTbGlkZUluZm8nXG4gICAgY29uc29sZS5sb2cgdGV4dFxuICAgICQoJy5tYXJrZG93bi1ib2R5JykuaHRtbCh0ZXh0KVxuIl19

@@ -1,0 +1,8 @@
+#comment-wrapper{
+    height: 100%;
+}
+
+#comment{
+    height:100%;
+    border: 5px solid;
+}

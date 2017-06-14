@@ -123,7 +123,8 @@ ipc.on 'textSend', (e, text) =>
 
   py.stdout.on 'end', () =>
      console.log dataString
-     mickrWin.send 'show', dataString
+     # 分類結果 雲で表示
+     mickrWin.getMainWindow().webContents.send 'show', dataString
 
   py.stdin.write(JSON.stringify(data));
   py.stdin.end()

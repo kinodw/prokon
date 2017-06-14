@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./node_modules/codemirror/addon/lint/lint.css">
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/stopWatch.css">
+    <link rel="stylesheet" type="text/css" href="css/presen.css">
        <script src="./TweenMax.js"></script>
   <script src="./telepathy-client/lib/bson/bson.js"></script>
   <script src="./telepathy-client/lib/crypto-js/md5.js"></script>
@@ -29,7 +30,12 @@
             <button id="btn1" class="icon icon-play"></button>
             <button id="btn2" class="icon icon-ccw"></button>
           </div>
-            <div class="pane-splitter left"></div>
+          <div id="comment-wrapper">
+            <h1>コメント</h1>
+            <div id="comment">
+            </div>
+          </div>
+          <div class="pane-splitter left"></div>
           </div>
           <div class="pane preview">
             <div class="pane-splitter right"></div>
