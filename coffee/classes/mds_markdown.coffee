@@ -45,10 +45,92 @@ module.exports = class MdsMarkdown
       size: 'svg'
       ext: '.svg'
 
-# create MarkdownInt object and apply plugins
+ # create MarkdownIt object and apply plugins
+ # return markdown-it instance
   @createMarkdownIt: (opts, plugins) ->
     md = markdownIt(opts)
     md.use(require(plugName), plugOpts ? {}) for plugName, plugOpts of plugins
+    COMMNET_BLOCK_OPNE_RE = /^{##\s*$/
+    COMMNET_BLOCK_CLOSE_RE = /^(.+\s+|\s*)##}$/
+    COMMNET_INLINE_RE = /^{## .* ##}/
+
+    # ブロックコメントルール
+    block_comment_rule = (state, startLine, endLine, silent)->
+      #var ch, match, nextLine, token,
+      pos = state.bMarks[startLine]
+      max = state.eMarks[startLine]
+      shift = state.tShift[startLine]
+
+      pos += shift
+
+      if (pos + 2 >= max)
+        return false
+
+      ch = state.src.charCodeAt(pos)
+
+      # Probably start
+      if (ch == 0x7B) # 0x7B は {
+          # opening tag
+          match = state.src.slice(pos, max).match(COMMNET_BLOCK_OPNE_RE);
+          if (!match)
+           return false
+      else
+          return false
+      # silentがよく分かってません；；
+      # おそらくvalidation modeでの動作だと思われる
+      if (silent)
+       return true
+
+      # search a end tag
+      nextLine = startLine;
+      while (nextLine < state.lineMax)
+          nextLine++;
+          pos = state.bMarks[nextLine]
+          max = state.eMarks[nextLine]
+          if (pos + state.tShift[nextLine] + 2 <= max)
+              if(state.src.slice(pos, max).match(COMMNET_BLOCK_CLOSE_RE))
+                  nextLine++;
+                  break;
+
+      state.line = nextLine;
+      token         = state.push('comment_block', '', 0);
+      token.map     = [ startLine, state.line ];
+      token.content = state.getLines(startLine, nextLine, 0, true);
+
+      return true
+
+    # インラインコメントルール
+    inline_comment_rule = (state, silent)->
+      #var ch, code, match,
+      pos = state.pos
+      max = state.posMax;
+
+      if (state.src.charCodeAt(pos) != 0x7B) # 0x78 は {
+          return false
+
+      if (pos + 1 < max)
+          ch = state.src.charCodeAt(pos + 1);
+
+          if (ch == 0x23)#  0x23 は *
+              match = state.src.slice(pos).match(COMMNET_INLINE_RE);
+              if (match)
+                  state.pos += match[0].length;
+                  return true;
+      return false
+
+
+    # 'fence'や'image'は既に追加されているルール名で，それの後にコメントルールを適用する．
+    # 'comment_block'は次のレンダリングルール名と合わせる必要あり．
+    md.block.ruler.after('fence', 'comment_block',block_comment_rule);
+    md.inline.ruler.after('image', 'comment_block',inline_comment_rule);
+
+    #追加したコメントのルールにマッチングする文字列の処理を追加する
+    comment_render_rule = (tokens, idx, options, env, self)->
+      #今回はコメントアウトするので，ブランク文字列を返却するだけ
+      return  '';
+
+    #'comment_block'はrulerを追加した時の第２引数と合わせる
+    md.renderer.rules.comment_block = comment_render_rule;
     md
 
   @generateAfterRender: ($) ->
@@ -120,6 +202,9 @@ module.exports = class MdsMarkdown
       image:      rules.image
       html_block: rules.html_block
 
+    # markdown-itのルールを上書き
+    # markdown-itのルールはオブジェクトになっており、キーに対してその関数が入っている
+    # applyの第一引数に渡したものは、applyで呼び出した先の関数のthisで扱える
     extend rules,
       emoji: (token, idx) =>
         twemoji.parse(token[idx].content, @twemojiOpts)
@@ -136,6 +221,7 @@ module.exports = class MdsMarkdown
         @renderers.html_block.apply(@, args)
         defaultRenderers.html_block.apply(@, args)
 
+  # ルールをいくつか上書きしたmarkdown-itでパースする
   parse: (markdown) =>
     @_rulers          = []
     @_settings        = new MdsMdSetting

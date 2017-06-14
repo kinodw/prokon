@@ -50,7 +50,9 @@ class EditorStates
     # EditorStatesクラスの変数rulersリストへ入れて、一旦ページを１にする
     @rulers = rulers if rulers?
     page    = 1
-    console.log @rulers
+    # console.log "1page = " + @pickUpCommentFromPage(1)
+    # console.log "last page = " + @pickUpCommentFromPage(@rulers.length+1)
+    #console.log @pickUpComment()
 
     # rulerLineには'---'の行位置が記されており、それとエディタ上のカーソル位置を比較してpageを決める
     lineNumber = @codeMirror.getCursor().line || 0
@@ -128,6 +130,39 @@ class EditorStates
   insertVideo: (filePath) =>
     console.log filePath
   #****************************************************************************
+
+  # page毎に別れたコメントのリストを返す
+  pickUpComment : () =>
+    pageMax = @rulers.length + 1
+    CommentEachPage = []
+    for i in [1...pageMax+1]
+      CommentEachPage.push(@pickUpCommentFromPage(i))
+    return CommentEachPage
+
+
+  # {## ##} で囲まれたコメント部分を抜き出す
+  # ブロックコメントの場合は{## ##}の前後に改行が入っていなければならない
+  # pickUpCommentFromPage(Number) -> String
+  pickUpCommentFromPage : (page) =>
+    if page==1
+      pageStartLine = 0
+      pageEndLine   = @rulers[0]
+    else if page == @rulers.length + 1
+      pageStartLine = @rulers[@rulers.length-1]
+      pageEndLine   = @codeMirror.lineCount()
+    else
+      pageStartLine = @rulers[page-2] + 1
+      pageEndLine   = @rulers[page-1] + 1
+
+    TextInEditor = @codeMirror.getRange {"line":pageStartLine , "ch": 0},{"line":pageEndLine-1 , "ch":0 }
+    re = /\{##[\s\n]*(.*)[\s\n]*##\}/
+    result = TextInEditor.match(re)
+    comment = ''
+    if(result)
+      comment = result[1]
+      return comment
+    else
+      return comment
 
   updateGlobalSetting: (prop, value) =>
     latestPos = null
