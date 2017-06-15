@@ -73,9 +73,9 @@ app.on 'ready', ->
   tray.on 'click', (e) =>
     mickrWin.switchShowMode(tray)
 
-  # tray2 = new Tray(Path.join __dirname, '../','lib', 'img', 'ic_pause_black_24dp_2x.png')
-  # tray2.on 'click', (e) =>
-  #   mickrWin.switchPause()
+  tray2 = new Tray(Path.join __dirname, '../','lib', 'img', 'ic_pause_black_24dp_2x.png')
+  tray2.on 'click', (e) =>
+    mickrWin.switchPause()
 
   # アプリのウインドウ
   global.marp.mainMenu = new MainMenu

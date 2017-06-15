@@ -19,6 +19,11 @@ document.addEventListener 'DOMContentLoaded', ->
       "body":
         "content": page
     }
+    client.send "changeComment", {
+      "to": "presenDevIndex",
+      "body":
+        "content": page
+    }
 
 
 
@@ -119,6 +124,7 @@ document.addEventListener 'DOMContentLoaded', ->
       # はじめのスライドの色を変えておき、そのページが選択されていることを示す
       $('.slide_wrapper').css('backgroundColor', '')
       $('#1').css('backgroundColor', '#ffe3b4')
+      changeSlide(1)
 
       # 押されたslide_wrapperのidを送信してページ遷移
       $('.slide_wrapper').on 'click', () ->
@@ -203,7 +209,7 @@ document.addEventListener 'DOMContentLoaded', ->
 
     # slide sort
     $('.markdown-body').sortable {
-
+      'opacity': 0.5
     }
     $('.markdown-body').disableSelection()
     $(document).on 'sortstop', '.markdown-body', () ->

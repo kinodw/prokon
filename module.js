@@ -928,8 +928,10 @@
       ipcRenderer.on('switch_pause', (e, pause) => {
         console.log('press switch_pause')
         if(pause) {
+          this.outerPause()
           this.animator.pauseAll()
         } else {
+          this.outerResume()
           this.animator.resumeAll()
         }
       });

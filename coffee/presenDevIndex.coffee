@@ -215,6 +215,9 @@ do ->
     "body":
       "content": ""
     }
+  client.on "changeComment", (e,data) =>
+    id = data.body.content
+    $('#comment').text(comment[id-1])
 
 
 
