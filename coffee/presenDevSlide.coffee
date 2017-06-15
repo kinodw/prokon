@@ -1,10 +1,27 @@
 clsMarkdown = require './classes/mds_markdown'
 ipc         = require('electron').ipcRenderer
 Path        = require 'path'
+MickrClient = require '../modules/MickrClient'
 
 resolvePathFromMarp = (path = './') -> Path.resolve(__dirname, '../', path)
 
 document.addEventListener 'DOMContentLoaded', ->
+  setting =
+   "id": "presenDevSlide"
+   "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+   "site": "test"
+   "token": "Pad:9948"
+  client = new MickrClient(setting);
+
+  changeSlide = (page) ->
+    client.send "goToPage", {
+      "to": "presenSlide",
+      "body":
+        "content": page
+    }
+
+
+
   slideHTML = ""
   slideList = []
   # slideListの何番目の要素が現在選択されているか
@@ -100,21 +117,22 @@ document.addEventListener 'DOMContentLoaded', ->
       $('#markdown').html(slideOuterHTML.join(' '))
 
       # はじめのスライドの色を変えておき、そのページが選択されていることを示す
-
+      $('.slide_wrapper').css('backgroundColor', '')
+      $('#1').css('backgroundColor', '#ffe3b4')
 
       # 押されたslide_wrapperのidを送信してページ遷移
       $('.slide_wrapper').on 'click', () ->
         # 選択されたスライドの色を変更し、　ページ遷移させる
         $('.slide_wrapper').css('backgroundColor', '')
         $(this).css('backgroundColor', '#ffe3b4')
-
-        ipc.sendToHost 'goToPage', $(this).attr('id')
+        $("html,body").animate({scrollTop:$(this).offset().top});
+        # ページ移動メッセージ送信
+        #ipc.sendToHost 'goToPage', $(this).attr('id')
+        changeSlide($(this).attr('id'))
 
       ipc.sendToHost 'rendered', md
       ipc.sendToHost 'rulerChanged', md.rulers if md.rulerChanged
       ipc.sendToHost 'themeChanged', md.changedTheme if md.changedTheme
-
-
     setImageDirectory = (dir) -> $('head > base').attr('href', dir || './')
 
     ipc.on 'render', (e, md) -> render(Markdown.parse(md))
@@ -137,22 +155,31 @@ document.addEventListener 'DOMContentLoaded', ->
         nextPageIndex = (selectedIndex + (slideList.length-1)) % slideList.length
         nextPageId    = slideList[nextPageIndex].id
         console.log 'next id = ' + nextPageId
+        $('.slide_wrapper').css('backgroundColor', '')
+        $("##{nextPageId}").css('backgroundColor', '#ffe3b4')
         selectedIndex = nextPageIndex
-        ipc.sendToHost 'goToPage', nextPageId
+        #ipc.sendToHost 'goToPage', nextPageId
+        changeSlide(nextPageId)
+        $("html,body").animate({scrollTop:$("##{nextPageId}").offset().top});
 
       if e.keyCode == 40
         console.log 'down key'
         nextPageIndex = (selectedIndex + 1) % slideList.length
         nextPageId    = slideList[nextPageIndex].id
         console.log 'next id = ' + nextPageId
+        $('.slide_wrapper').css('backgroundColor', '')
+        $("##{nextPageId}").css('backgroundColor', '#ffe3b4')
         selectedIndex = nextPageIndex
-        ipc.sendToHost 'goToPage', nextPageId
+        #ipc.sendToHost 'goToPage', nextPageId
+        changeSlide(nextPageId)
+        $("html,body").animate({scrollTop:$("##{nextPageId}").offset().top});
 
     $(window).resize (e) -> applyScreenSize()
     applyScreenSize()
 
 
     # presentation ========================
+
     ipc.on 'requestSlideInfo', () =>
       console.log 'receive requestSlideInfo'
       markdownBody = document.querySelector('.markdown-body')

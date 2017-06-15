@@ -52,7 +52,9 @@ class EditorStates
     # EditorStatesクラスの変数rulersリストへ入れて、一旦ページを１にする
     @rulers = rulers if rulers?
     page    = 1
-    # console.log "1page = " + @pickUpCommentFromPage(1)
+   # console.log "comment 1page = " + @pickUpCommentFromPage(1)
+    console.log "rulers.length = " + @rulers.length
+    console.log @pickUpComment()
     # console.log "last page = " + @pickUpCommentFromPage(@rulers.length+1)
     #console.log @pickUpComment()
 
@@ -138,6 +140,7 @@ class EditorStates
     pageMax = @rulers.length + 1
     CommentEachPage = []
     for i in [1...pageMax+1]
+      console.log i
       CommentEachPage.push(@pickUpCommentFromPage(i))
     return CommentEachPage
 
@@ -146,7 +149,11 @@ class EditorStates
   # ブロックコメントの場合は{## ##}の前後に改行が入っていなければならない
   # pickUpCommentFromPage(Number) -> String
   pickUpCommentFromPage : (page) =>
-    if page==1
+    if page==1 and not @rulers.length
+      pageStartLine = 0
+      pageEndLine   = @codeMirror.lineCount()
+      console.log "pageEndLine = " + pageEndLine
+    else if page == 1 and @rulers.length != 0
       pageStartLine = 0
       pageEndLine   = @rulers[0]
     else if page == @rulers.length + 1
@@ -162,9 +169,7 @@ class EditorStates
     comment = ''
     if(result)
       comment = result[1]
-      return comment
-    else
-      return comment
+    return comment
 
   updateGlobalSetting: (prop, value) =>
     latestPos = null
@@ -259,19 +264,6 @@ do ->
     $('#preview')[0]
   )
 
-  setting =
-    "id": "index"
-    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
-    "site": "test"
-    "token": "Pad:9948"
-  client = new MickrClient(setting)
-
-  client.on "canReceiveComment", ()=>
-    client.send "sendComment", {
-      "to": "presenIndex",
-      "body":
-        "content": editorStates.pickUpComment()
-    }
 
 
   # View modes
@@ -406,7 +398,28 @@ do ->
     .on 'setTheme', (theme) -> editorStates.updateGlobalSetting '$theme', theme
     .on 'themeChanged', (theme) -> MdsRenderer.sendToMain 'themeChanged', theme
     .on 'resourceState', (state) -> loadingState = state
-##################################################
+  ##################################################
+
+  setting =
+    "id": "index"
+    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+    "site": "test"
+    "token": "Pad:9948"
+  client = new MickrClient(setting)
+
+  client.on "canReceiveEditorText", ()=>
+    client.send "sendEditorText", {
+      "to": "presenIndex"
+      "body":
+        "content": editorStates.codeMirror.getValue()
+    }
+  client.on "canReceiveComment", ()=>
+   client.send "sendComment", {
+     "to": "presenDevIndex",
+     "body":
+       "content": editorStates.pickUpComment()
+   }
+
   webview = document.querySelector('#preview')
   # simple presentation mode on!
   # $('#presentation').on 'click', () =>

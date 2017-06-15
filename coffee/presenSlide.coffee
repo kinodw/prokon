@@ -1,6 +1,7 @@
 clsMarkdown = require './classes/mds_markdown'
 ipc         = require('electron').ipcRenderer
 Path        = require 'path'
+MickrClient = require '../modules/MickrClient'
 
 resolvePathFromMarp = (path = './') -> Path.resolve(__dirname, '../', path)
 
@@ -129,15 +130,17 @@ document.addEventListener 'DOMContentLoaded', ->
 
 
     # presentation ========================
+    setting =
+     "id": "presenSlide"
+     "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+     "site": "test"
+     "token": "Pad:9948"
 
-    # markdownBodyをHTMLそのまま送信するVer
-    # ipc.on 'requestSlideInfo', () =>
-    #   console.log 'receive requestSlideInfo'
-    #   markdownBody = document.querySelector('.markdown-body')
-    #  # console.log markdownBody.innerHTML
-    #   ipc.sendToHost 'sendSlideInfo', markdownBody.innerHTML
-    #   console.log markdownBody.innerHTML
-    #   console.log 'send sendSlideInfo'
+    client = new MickrClient(setting);
+
+    client.on "goToPage", (e, data)=>
+      page = data.body.content
+      applyCurrentPage page
 
     # markdownBodyをオブジェクトで送信するVer
     ipc.on 'requestSlideInfo', () =>
@@ -145,16 +148,10 @@ document.addEventListener 'DOMContentLoaded', ->
       markdownBody = []
       $('.slide_wrapper').each (idx, elem) =>
         markdownBody.push elem.outerHTML # <div class=slide_wrapper id=1> ...
-
       console.log markdownBody
-
       ipc.sendToHost 'sendSlideInfo', markdownBody
       console.log 'send sendSlideInfo'
 
-    # ipc.on 'setSlide', (e, text) =>
-    #   console.log 'receive setText'
-    #   console.log text
-      # $('.markdown-body').html(text)
     ipc.sendToHost 'requestSlideHTML', () =>
       console.log 'send requestSlideHTML'
 

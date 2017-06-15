@@ -6,23 +6,9 @@ MickrClient = require '../modules/MickrClient'
 
 resolvePathFromMarp = (path = './') -> Path.resolve(__dirname, '../', path)
 document.addEventListener 'DOMContentLoaded', ->
-  console.log "#{__dirname}"
   $ = window.jQuery = window.$ = require('jquery')
-  setting =
-     "id": "slide"
-     "url": "ws://apps.wisdomweb.net:64260/ws/mik"
-    "site": "test"
-    "token": "Pad:9948"
-
-  console.log "setting = " + setting
-  console.log "setting.url = " + setting.url
-  client = new MickrClient(setting);
-  console.log client
-
 
   do ($) ->
-
-
     # First, resolve Marp resources path
     $("[data-marp-path-resolver]").each ->
       for target in $(@).attr('data-marp-path-resolver').split(/\s+/)
@@ -144,6 +130,15 @@ document.addEventListener 'DOMContentLoaded', ->
 
 
     # presentation ========================
+    setting =
+     "id": "slide"
+     "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+     "site": "test"
+     "token": "Pad:9948"
+
+    client = new MickrClient(setting);
+    console.log client
+
 
     # markdownBodyをHTMLそのまま送信するVer
     # ipc.on 'requestSlideInfo', () =>
@@ -155,6 +150,7 @@ document.addEventListener 'DOMContentLoaded', ->
     #   console.log 'send sendSlideInfo'
 
     # markdownBodyをオブジェクトで送信するVer
+
     ipc.on 'requestSlideInfo', () =>
       console.log 'receive requestSlideInfo'
       markdownBody = []

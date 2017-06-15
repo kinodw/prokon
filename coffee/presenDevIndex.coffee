@@ -9,6 +9,7 @@ MdsRenderer.requestAccept()
 #webFrame.setZoomLevelLimits(1, 1)
 
 class PresenDevStates
+  comment = []
   currentPage: null
   previewInitialized: false
   lastRendered: {}
@@ -133,22 +134,6 @@ class PresenDevStates
             reset.prop("disabled", false);
 
 do ->
-  document.addEventListener "DOMContentLoaded", (event)=>
-    setting =
-      "id": "presenIndex"
-      "url": "ws://apps.wisdomweb.net:64260/ws/mik"
-      "site": "test"
-      "token": "Pad:9948"
-    client = new MickrClient(setting)
-    client.send "canReceiveComment", {
-      "to": "index"
-      "body":
-        "content": ""
-    }
-    # コメント受信
-    client.on "sendComment", (e, data) =>
-      console.log data.body.content
-
 
   slideHTML = ""
   presenDevStates = new PresenDevStates(
@@ -214,26 +199,26 @@ do ->
     .on 'setTheme', (theme) -> presenDevStates.updateGlobalSetting '$theme', theme
     .on 'resourceState', (state) -> loadingState = state
 ##################################################
+  setting =
+    "id": "presenDevIndex"
+    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+    "site": "test"
+    "token": "Pad:9948"
+  client = new MickrClient(setting)
+    # コメント受信
+  client.on "sendComment", (e, data) =>
+    @comment = [].concat(data.body.content)
+    console.log @comment
+
+  client.send "canReceiveComment", {
+    "to": "index"
+    "body":
+      "content": ""
+    }
+
+
+
   webview = document.querySelector('#preview')
-  # simple presentation mode on!
-  # $('#presentation').on 'click', () =>
-  #   webview.webkitRequestFullScreen()
-
-  # $('#presentation').on 'click', () =>
-  #   $('.pane.markdown').toggle()
-  #   ipc.send('Presentation')
-
-  # ipc.on 'initialize' () =>
-
-  # ipc.on "presentation", () ->
-  #   console.log "recieve presentation"
-  #   ipc.send "textSend", presenDevStates.codeMirror.getValue()
-  #   console.log 'send textSend'
-
-  $('#presentation').on 'click', () =>
-    # $('.pane.markdown').toggle()
-    webview.send 'requestSlideInfo'
-    console.log 'send requestSlideInfo'
 
   webview.addEventListener 'ipc-message', (event) =>
      switch event.channel
@@ -257,12 +242,3 @@ do ->
       console.log 'receive presenDevInitialize'
       console.log text
       slideHTML = text
-
-      # webview の準備ができてない
-      # webview.send 'setSlide', text
-      # console.log 'send setSlide'
-  # ipc.on 'initialize', () =>
-  #   $('.pane.markdown').html()
-###################################################
-
-  # Initialize

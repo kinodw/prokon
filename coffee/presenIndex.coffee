@@ -4,6 +4,7 @@ MdsMenu           = require './js/classes/mds_menu'
 clsMdsRenderer    = require './js/classes/mds_renderer'
 createValidator   = require 'codemirror-textlint'
 MdsRenderer       = new clsMdsRenderer
+MickrClient       = require './modules/MickrClient'
 MdsRenderer.requestAccept()
 
 webFrame.setZoomLevelLimits(1, 1)
@@ -220,13 +221,6 @@ do ->
     $('#preview')[0]
   )
 
-  setting =
-    "id": "index"
-    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
-    "site": "test"
-    "token": "Pad:9948"
-  client = new MickrClient(setting)
-
   # Splitter
   draggingSplitter      = false
   draggingSplitPosition = undefined
@@ -335,6 +329,25 @@ do ->
     .on 'setTheme', (theme) -> presenStates.updateGlobalSetting '$theme', theme
     .on 'themeChanged', (theme) -> MdsRenderer.sendToMain 'themeChanged', theme
     .on 'resourceState', (state) -> loadingState = state
+
+  # MickrClient================================================
+  setting =
+    "id": "presenIndex"
+    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+    "site": "test"
+    "token": "Pad:9948"
+  client = new MickrClient(setting)
+
+  client.send "canReceiveEditorText",{
+    "to": "index"
+    "body":
+      "content": ""
+  }
+  client.on "sendEditorText", (e, data)=>
+    editorText = data.body.content
+    console.log data.body.content
+    presenStates.codeMirror.setValue(editorText)
+  # ==========================================================
 
   webview = document.querySelector('#preview')
 
