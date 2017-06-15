@@ -13,21 +13,18 @@ Path           = require 'path'
 electron       = require 'electron'
 ipc        = electron.ipcMain
 
-
-module.exports = class PresenWindow extends MdsWindow
-  constructor: (fileOpts = {}, @options = {}, slideHTML) ->
+module.exports = class MdsPresenDevWindow extends MdsWindow
+    constructor: (fileOpts = {}, @options = {}, slideHTML) ->
         @path = fileOpts?.path || null
         slide = slideHTML
 
         #@viewMode = global.marp.config.get('viewMode')
 
-        @viewMode = 'screen'
+        @viewMode = 'presen-dev'
 
         @browserWindow = do =>
           # 初期設定options と @options をマージして初期化、ウインドウID設定
-          bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options,{
-                'titleBarStyle': 'hidden'
-            })
+          bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options)
           @_window_id = bw.id
 
           loadCmp = (details) =>
@@ -54,7 +51,7 @@ module.exports = class PresenWindow extends MdsWindow
 
           bw.maximize() if global.marp.config.get 'windowPosition.maximized'
 
-          bw.loadURL "file://#{__dirname}/../../presenIndex.html"
+          bw.loadURL "file://#{__dirname}/../../presenDevIndex.html"
 
           bw.webContents.on 'did-finish-load', =>
             @_windowLoaded = true

@@ -14,6 +14,7 @@ require 'codemirror/mode/markdown/markdown'
 require 'codemirror/mode/gfm/gfm'
 require 'codemirror/addon/edit/continuelist'
 require "codemirror/addon/lint/lint"
+MickrClient = require './modules/MickrClient'
 
 class EditorStates
   rulers: []
@@ -25,6 +26,7 @@ class EditorStates
   _imageDirectory: null
 
   constructor: (@codeMirror, @preview) ->
+    console.log "#{__dirname}"
     @initializeEditor()
     @initializePreview()
 
@@ -227,6 +229,14 @@ validator = createValidator({
     'noStartDuplicatedConjunction' : noStartDuplicatedConjunction
   }
   });
+document.addEventListener "DOMContentLoaded", (event)=>
+
+  # client.send "morning",
+  #   "from": setting.id,
+  #   "to" : "land",
+  #   "body":
+  #     "content": "hello! land! i'm index"
+
 
 do ->
   slideHTML = ""
@@ -248,6 +258,21 @@ do ->
     ),
     $('#preview')[0]
   )
+
+  setting =
+    "id": "index"
+    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+    "site": "test"
+    "token": "Pad:9948"
+  client = new MickrClient(setting)
+
+  client.on "canReceiveComment", ()=>
+    client.send "sendComment", {
+      "to": "presenIndex",
+      "body":
+        "content": editorStates.pickUpComment()
+    }
+
 
   # View modes
   $('.viewmode-btn[data-viewmode]').click -> MdsRenderer.sendToMain('viewMode', $(this).attr('data-viewmode'))
@@ -400,8 +425,8 @@ do ->
   #   console.log 'send textSend'
 
   $('#presentation').on 'click', () =>
-    $('.pane.markdown').toggle()
-    $('.toolbar-footer').toggle()
+    # $('.pane.markdown').toggle()
+    # $('.toolbar-footer').toggle()
     webview.send 'requestSlideInfo'
     console.log 'send requestSlideInfo'
 

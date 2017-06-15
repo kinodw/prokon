@@ -3,46 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <title>Electron</title>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-    <!-- CSSを記述 -->
+
     <link rel="stylesheet" href="css/slide.css" data-marp-path-resolver="href" />
     <link rel="stylesheet" id="theme-css" href="css/themes/default.css" data-marp-path-resolver="href" />
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-    <script>if (window.module) module = window.module;</script>
+
     <base href="./" target="_blank">
-    <script src="./TweenMax.js"></script>
-    <script src="./telepathy-client/lib/bson/bson.js"></script>
-    <script src="./telepathy-client/lib/crypto-js/md5.js"></script>
-    <script src="./telepathy-client/lib/EventEmitter/EventEmitter.js"></script>
-    <script src="./telepathy-client/lib/node-uuid/uuid.js"></script>
-    <script src="./telepathy-client/telepathy-client.js"></script>
-    <script src="./module.js" ></script>
   </head>
-  <body class="slide-view presen-dev">
+  <body class="slide-view screen">
     <div id="container">
       <div id="markdown" class="markdown-body"></div>
     </div>
-
-    <script>
-       document.addEventListener("DOMContentLoaded", function(event) {
-      const setting = {
-         "id": "presenSlide",
-        "url": "ws://apps.wisdomweb.net:64260/ws/mik",
-        "site": "test",
-        "token": "Pad:9948"
-      };
-      const client = new MickrClient(setting);
-
-      client.send("", {
-        "from": setting.id,
-        "to"  : "slide",
-        "body": {
-          "content" : "hello! slide!"
-        }
-      });
-    });
-    </script>
   </body>
 </html>

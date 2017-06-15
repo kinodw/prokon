@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "async": "^2.4.1",
+    "bson": "^1.0.4",
     "codemirror": "^5.11.0",
     "codemirror-textlint": "^1.2.0",
     "extend": "^3.0.0",
@@ -60,6 +61,7 @@
     "photon": "github:connors/photon",
     "textlint-rule-preset-ja-technical-writing": "^0.1.3",
     "twemoji": "github:twitter/twemoji#v2.2.1",
+    "ws": "^3.0.0",
     "xml2js": "^0.4.17"
   }
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electron</title>
+    <script>window.jQuery = window.$ = require('jquery');</script>
+
+    <link rel="stylesheet" href="node_modules/photon/dist/css/photon.css" />
+    <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" href="./node_modules/codemirror/addon/lint/lint.css">
+    <link rel="stylesheet" href="css/index.css" />
+  </head>
+
+  <body style="-webkit-app-region: drag">
+    <div class="window">
+      <div class="window-content">
+        <div class="pane-group">
+          <div class="pane markdown">
+            <textarea id="editor" wrap="soft"></textarea>
+            <div class="pane-splitter left"></div>
+          </div>
+          <div class="pane preview">
+            <div class="pane-splitter right"></div>
+           <!--  <div class="preview-loading"><img src="./images/throbbers/white.svg" class="throbber" /></div> -->
+            <webview id="preview" autosize="on" preload="./js/presenSlide.js" src="presenSlide.html" blinkFeatures="CSSVariables"></webview>
+          </div>
+        </div>
+      </div>
+    </div>
+  <script src="js/presenIndex.js"></script>
+  </body>
+
+</html>

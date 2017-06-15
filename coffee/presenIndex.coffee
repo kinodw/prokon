@@ -2,12 +2,22 @@ ipc = require('electron').ipcRenderer
 {shell, webFrame} = require 'electron'
 MdsMenu           = require './js/classes/mds_menu'
 clsMdsRenderer    = require './js/classes/mds_renderer'
+createValidator   = require 'codemirror-textlint'
 MdsRenderer       = new clsMdsRenderer
 MdsRenderer.requestAccept()
 
 webFrame.setZoomLevelLimits(1, 1)
 
+CodeMirror = require 'codemirror'
+require 'codemirror/mode/xml/xml'
+require 'codemirror/mode/markdown/markdown'
+require 'codemirror/mode/gfm/gfm'
+require 'codemirror/addon/edit/continuelist'
+require "codemirror/addon/lint/lint"
+MickrClient = require './modules/MickrClient'
+
 class PresenStates
+  rulers: []
   currentPage: null
   previewInitialized: false
   lastRendered: {}
@@ -15,10 +25,47 @@ class PresenStates
   _lockChangedStatus: false
   _imageDirectory: null
 
-  constructor: (@preview) ->
+  constructor: (@codeMirror, @preview) ->
+    @initializeEditor()
     @initializePreview()
-    # @initializeStopWatch()
 
+    @menu = new MdsMenu [
+      { label: '&Undo', accelerator: 'CmdOrCtrl+Z', click: (i, w) => @codeMirror.execCommand 'undo' if w and !w.mdsWindow.freeze }
+      {
+        label: '&Redo'
+        accelerator: do -> if process.platform is 'win32' then 'Control+Y' else 'Shift+CmdOrCtrl+Z'
+        click: (i, w) => @codeMirror.execCommand 'redo' if w and !w.mdsWindow.freeze
+      }
+      { type: 'separator' }
+      { label: 'Cu&t', accelerator: 'CmdOrCtrl+X', role: 'cut' }
+      { label: '&Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' }
+      { label: '&Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' }
+      { label: '&Delete', role: 'delete' }
+      { label: 'Select &All', accelerator: 'CmdOrCtrl+A', click: (i, w) => @codeMirror.execCommand 'selectAll' if w and !w.mdsWindow.freeze }
+      { type: 'separator', platform: 'darwin' }
+      { label: 'Services', role: 'services', submenu: [], platform: 'darwin' }
+    ]
+
+  # ページカウント後、webviewへそれを送信
+  refreshPage: (rulers) =>
+    # presenStatesクラスの変数rulersリストへ入れて、一旦ページを１にする
+    @rulers = rulers if rulers?
+    page    = 1
+    # console.log "1page = " + @pickUpCommentFromPage(1)
+    # console.log "last page = " + @pickUpCommentFromPage(@rulers.length+1)
+    #console.log @pickUpComment()
+
+    # rulerLineには'---'の行位置が記されており、それとエディタ上のカーソル位置を比較してpageを決める
+    lineNumber = @codeMirror.getCursor().line || 0
+    for rulerLine in @rulers
+      page++ if rulerLine <= lineNumber
+
+    # ruler計算後にページの増減があった場合、正しいページ情報をwebviewへ送信
+    if @currentPage != page
+      @currentPage = page
+      @preview.send 'currentPage', @currentPage if @previewInitialized
+
+    $('#page-indicator').text "Page #{@currentPage} / #{@rulers.length + 1}"
 
   initializePreview: =>
     $(@preview)
@@ -53,89 +100,132 @@ class PresenStates
       .on 'did-finish-load', (e) =>
         @preview.send 'currentPage', 1
         @preview.send 'setImageDirectory', @_imageDirectory
-        @preview.send 'render', ""
+        @preview.send 'render', @codeMirror.getValue()  # render イベント送信でruler確認してページ切り替わり
 
   openLink: (link) =>
     shell.openExternal link if /^https?:\/\/.+/.test(link)
 
-  initializeStopWatch: =>
+  initializeEditor: =>
+    @codeMirror.on 'contextmenu', (cm, e) =>
+      e.preventDefault()
+      @codeMirror.focus()
+      @menu.popup()
+      false
 
-    time = 0
-    mid = 0
+    @codeMirror.on 'change', (cm, chg) =>
+      @preview.send 'render', cm.getValue()
+      MdsRenderer.sendToMain 'setChangedStatus', true if !@_lockChangedStatus
 
-    min_time = 0
-    sec_time = 0
+    @codeMirror.on 'cursorActivity', (cm) => window.setTimeout (=> @refreshPage()), 5
 
-    now = null
-    count = null
+    $('.pane.markdown').toggle()
 
-    min = $("#min")
-    sec = $("#sec")
+  setImageDirectory: (directory) =>
+    if @previewInitialized
+      @preview.send 'setImageDirectory', directory
+      @preview.send 'render', @codeMirror.getValue()
+    else
+      @_imageDirectory = directory
 
-    start = $("#start")
-    stop = $("#stop")
-    reset = $("#reset")
+  insertImage: (filePath) => @codeMirror.replaceSelection("![](#{filePath.replace(/ /g, '%20')})\n")
 
-    #startボタンが押された時の処理
-    start.click () ->
-        now = new Date() #現在時刻
-        count = setInterval(counter, 10)
-        toggle()
-        reset.css("color", "#FF9194")
-
-    #stopボタンが押された時の処理
-    stop.click () ->
-        mid += (new Date() - now)/1000
-        clearInterval(count)
-        toggle()
-        reset.css("color", "red")
+  #********************************TODO****************************************
+  insertVideo: (filePath) =>
+    console.log filePath
+  #****************************************************************************
 
 
-    #resetボタンが押された時の処理
-    reset.click () ->
-        mid = 0
-        min.html("0")
-        sec.html("00.00")
-        reset.css("color", "gray")
-        reset.prop("disabled", true)
+  updateGlobalSetting: (prop, value) =>
+    latestPos = null
 
-    #時間の計算
-    counter = ()->
-        time = mid + ((new Date() - now)/1000)
+    for obj in (@lastRendered?.settingsPosition || [])
+      latestPos = obj if obj.property is prop
 
-        #60秒経過した時の処理
-        if(time > 60)
-            mid = 0
-            min_time++
-            now = new Date()
-            time = 0
-            sec.html()
+    if latestPos?
+      @codeMirror.replaceRange(
+        "#{prop}: #{value}",
+        CodeMirror.Pos(latestPos.lineIdx, latestPos.from),
+        CodeMirror.Pos(latestPos.lineIdx, latestPos.from + latestPos.length),
+      )
+    else
+      @codeMirror.replaceRange(
+        "<!-- #{prop}: #{value} -->\n\n",
+        CodeMirror.Pos(@codeMirror.firstLine(), 0)
+      )
 
-
-        #秒数が10秒より小さかったら01, 02のようにする
-        if(time < 10)
-            sec.html("0"+time.toFixed(2))
-        else
-            sec.html(time.toFixed(2))
-        min.html(min_time);
+loadingState = 'loading'
 
 
-    #ボタンの切り替え
-    toggle = () ->
-        if(!start.prop("disabled"))
-            start.prop("disabled", true);
-            stop.prop("disabled", false);
-            reset.prop("disabled", true);
-        else
-            start.prop("disabled", false);
-            stop.prop("disabled", true);
-            reset.prop("disabled", false);
+
+# textlint rules setting
+
+noAbusage = require 'textlint-rule-ja-no-abusage'
+mixedPeriod = require 'textlint-rule-ja-no-mixed-period'
+successiveWord = require 'textlint-rule-ja-no-successive-word'
+weakPhrase = require 'textlint-rule-ja-no-weak-phrase'
+maxComma = require 'textlint-rule-max-comma'
+kanjiContinuousLen = require 'textlint-rule-max-kanji-continuous-len'
+maxTen = require 'textlint-rule-max-ten'
+noDoubleNegativeJa = require 'textlint-rule-no-double-negative-ja'
+noDoubledConjunction = require 'textlint-rule-no-doubled-conjunction'
+noDoubledConjunctiveParticleGa = require 'textlint-rule-no-doubled-conjunctive-particle-ga'
+noDoubledJoshi = require 'textlint-rule-no-doubled-joshi'
+noDroppingTheRa = require 'textlint-rule-no-dropping-the-ra'
+noExclamationQuestionMark = require 'textlint-rule-no-exclamation-question-mark'
+noHankakuKana = require 'textlint-rule-no-hankaku-kana'
+noMixDearuDesumasu = require 'textlint-rule-no-mix-dearu-desumasu'
+noNfd = require 'textlint-rule-no-nfd'
+noStartDuplicatedConjunction = require 'textlint-rule-no-start-duplicated-conjunction'
+
+validator = createValidator({
+  rules: {
+    'noAbusage' : noAbusage,
+    'mixedPeriod' : mixedPeriod,
+    'successiveWord' : successiveWord,
+    'weakPhrase' : weakPhrase,
+    'maxComma' : maxComma,
+    'kanjiContinuousLen' : kanjiContinuousLen,
+    'maxTen' : maxTen,
+    'noDoubledNegativeJa' : noDoubleNegativeJa,
+    'noDoubledConjunction' : noDoubledConjunction,
+    'noDoubledConjunctiveParticleGa' : noDoubledConjunctiveParticleGa,
+    'noDoubledJoshi' : noDoubledJoshi,
+    'noDroppingTheRa' : noDroppingTheRa,
+    'noExclamationQuestionMark' : noExclamationQuestionMark,
+    'noHankakuKana' : noHankakuKana,
+    'noMixDearuDesumasu' : noMixDearuDesumasu,
+    'noNfd' : noNfd,
+    'noStartDuplicatedConjunction' : noStartDuplicatedConjunction
+  }
+  });
 
 do ->
   slideHTML = ""
   presenStates = new PresenStates(
+    CodeMirror.fromTextArea($('#editor')[0],
+      # gfm : Github Flavored Mode
+      mode: 'gfm'
+      #theme: 'base16-light'
+      lineWrapping: true
+      lineNumbers: true
+      dragDrop: false
+      gutters: ["CodeMirror-lint-markers"]
+      lint: {
+         "getAnnotations": validator,
+         "async": true
+      }
+      extraKeys:
+        Enter: 'newlineAndIndentContinueMarkdownList'
+    ),
     $('#preview')[0]
   )
+
+  setting =
+    "id": "index"
+    "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+    "site": "test"
+    "token": "Pad:9948"
+  client = new MickrClient(setting)
 
   # Splitter
   draggingSplitter      = false
@@ -148,6 +238,11 @@ do ->
     $('.pane.preview').css('flex-grow', (1 - splitPoint) * 100)
 
     return splitPoint
+
+  setEditorConfig = (editorConfig) ->
+    editor = $(presenStates.codeMirror?.getWrapperElement())
+    editor.css('font-family', editorConfig.fontFamily) if editor?
+    editor.css('font-size', editorConfig.fontSize) if editor?
 
   $('.pane-splitter')
     .mousedown ->
@@ -171,6 +266,47 @@ do ->
 
   # Events
   MdsRenderer
+    .on 'publishPdf', (fname) ->
+      presenStates.codeMirror.getInputField().blur()
+      $('body').addClass 'exporting-pdf'
+
+      presenStates.preview.send 'requestPdfOptions', { filename: fname }
+
+    .on 'responsePdfOptions', (opts) ->
+      # Wait loading resources
+      startPublish = ->
+        if loadingState is 'loading'
+          setTimeout startPublish, 250
+        else
+          presenStates.preview.printToPDF
+            marginsType: 1
+            pageSize: opts.exportSize
+            printBackground: true
+          , (err, data) ->
+            unless err
+              MdsRenderer.sendToMain 'writeFile', opts.filename, data, { finalized: 'unfreeze' }
+            else
+              MdsRenderer.sendToMain 'unfreeze'
+
+      setTimeout startPublish, 500
+
+    .on 'unfreezed', ->
+      presenStates.preview.send 'unfreeze'
+      $('body').removeClass 'exporting-pdf'
+
+    .on 'loadText', (buffer) ->
+      presenStates._lockChangedStatus = true
+      presenStates.codeMirror.setValue buffer
+      presenStates.codeMirror.clearHistory()
+      presenStates._lockChangedStatus = false
+
+    .on 'setImageDirectory', (directories) -> presenStates.setImageDirectory directories
+
+    # send text to save to main process and reload
+    .on 'save', (fname, triggers = {}) ->
+      MdsRenderer.sendToMain 'writeFile', fname, presenStates.codeMirror.getValue(), triggers
+      MdsRenderer.sendToMain 'initializeState', fname
+
     .on 'viewMode', (mode) ->
       switch mode
         when 'markdown'
@@ -186,36 +322,21 @@ do ->
       $('.viewmode-btn[data-viewmode]').removeClass('active')
         .filter("[data-viewmode='#{mode}']").addClass('active')
 
+    .on 'editCommand', (command) -> presenStates.codeMirror.execCommand(command)
+
     .on 'openDevTool', ->
       if presenStates.preview.isDevToolsOpened()
         presenStates.preview.closeDevTools()
       else
         presenStates.preview.openDevTools()
 
+    .on 'setEditorConfig', (editorConfig) -> setEditorConfig editorConfig
     .on 'setSplitter', (spliiterPos) -> setSplitter spliiterPos
     .on 'setTheme', (theme) -> presenStates.updateGlobalSetting '$theme', theme
+    .on 'themeChanged', (theme) -> MdsRenderer.sendToMain 'themeChanged', theme
     .on 'resourceState', (state) -> loadingState = state
-##################################################
+
   webview = document.querySelector('#preview')
-  # simple presentation mode on!
-  # $('#presentation').on 'click', () =>
-  #   webview.webkitRequestFullScreen()
-
-  # $('#presentation').on 'click', () =>
-  #   $('.pane.markdown').toggle()
-  #   ipc.send('Presentation')
-
-  # ipc.on 'initialize' () =>
-
-  # ipc.on "presentation", () ->
-  #   console.log "recieve presentation"
-  #   ipc.send "textSend", presenStates.codeMirror.getValue()
-  #   console.log 'send textSend'
-
-  $('#presentation').on 'click', () =>
-    # $('.pane.markdown').toggle()
-    webview.send 'requestSlideInfo'
-    console.log 'send requestSlideInfo'
 
   webview.addEventListener 'ipc-message', (event) =>
      switch event.channel
@@ -226,25 +347,22 @@ do ->
         ipc.send 'textSend', slideInfo
         console.log 'send textSend'
         break
+
        when "requestSlideHTML"
         webview.send 'setSlide', slideHTML
         console.log 'send setSlide'
         break
-       when "goToPage"
-        page = event.args[0]
-        console.log page
-        ipc.send 'goToPage', page
 
   ipc.on 'presenDevInitialize', (e, text) =>
       console.log 'receive presenDevInitialize'
       console.log text
       slideHTML = text
 
-      # webview の準備ができてない
-      # webview.send 'setSlide', text
-      # console.log 'send setSlide'
-  # ipc.on 'initialize', () =>
-  #   $('.pane.markdown').html()
-###################################################
+  ipc.on 'goToPage', (e, page) =>
+    console.log page
+    webview.send 'goToPage', page
+
 
   # Initialize
+  presenStates.codeMirror.focus()
+  presenStates.refreshPage()

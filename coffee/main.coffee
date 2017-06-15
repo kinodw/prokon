@@ -6,6 +6,7 @@ global.marp or=
 Path      = require 'path'
 MdsWindow = require './classes/mds_window'
 MdsPresenWindow = require './classes/mds_presen_window'
+MdsPresenDevWindow = require './classes/mds_presen_dev_window'
 MainMenu  = require './classes/mds_main_menu'
 {exist}   = require './classes/mds_file'
 electron  = require 'electron'
@@ -20,6 +21,7 @@ slideInfo = ""
 presenDevWin = null
 win = null
 mickrWin = null
+presenWin = null
 
 tray = null;
 tray2 = null;
@@ -90,7 +92,25 @@ ipc.on 'textSend', (e, text) =>
   console.log 'receive textSend'
   #console.log text
 
-  @presenDevWin= new MdsPresenWindow {}, {}, text
+  @presenDevWin= new MdsPresenDevWindow {}, {}, text
+
+  electronScreen = electron.screen
+  displays = electronScreen.getAllDisplays()
+  externalDisplay = null
+  for i in displays
+    if (i.bounds.x != 0 || i.bounds.y != 0)
+      externalDisplay = i
+      break
+  #　外部ディスプレイが存在する場合
+  if (externalDisplay)
+    @presenWin = new MdsPresenWindow
+      x: externalDisplay.bounds.x + 50,
+      y: externalDisplay.bounds.y + 50
+  # 外部ディスプレイが存在しない場合
+  else
+    @presenWin = new MdsPresenWindow
+      width:800
+      height: 600
   # text には、slide_wrapperのHTML要素がid順に入っている
   @slideInfo = text
   nonHTML = []

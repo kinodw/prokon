@@ -8,13 +8,13 @@
     <link rel="stylesheet" id="theme-css" href="css/themes/default.css" data-marp-path-resolver="href" />
 
     <base href="./" target="_blank">
-   <script src="./TweenMax.js"></script>
+ <!--   <script src="./TweenMax.js"></script>
   <script src="./telepathy-client/lib/bson/bson.js"></script>
   <script src="./telepathy-client/lib/crypto-js/md5.js"></script>
   <script src="./telepathy-client/lib/EventEmitter/EventEmitter.js"></script>
   <script src="./telepathy-client/lib/node-uuid/uuid.js"></script>
   <script src="./telepathy-client/telepathy-client.js"></script>
-   <script src="./module.js" ></script>
+   <script src="./module.js" ></script> -->
   </head>
   <body class="slide-view screen">
     <div id="container">
@@ -24,25 +24,25 @@
       <img src="images/throbbers/white.svg" data-marp-path-resolver="src" />
     </div> -->
   <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
-      const setting = {
-         "id": "slide",
-        "url": "ws://apps.wisdomweb.net:64260/ws/mik",
-        "site": "test",
-        "token": "Pad:9948"
-      };
-      const client = new MickrClient(setting);
+    // document.addEventListener("DOMContentLoaded", function(event) {
+    //   const setting = {
+    //      "id": "slide",
+    //     "url": "ws://apps.wisdomweb.net:64260/ws/mik",
+    //     "site": "test",
+    //     "token": "Pad:9948"
+    //   };
+    //   const client = new MickrClient(setting);
 
-      client.send("morning", {
-        "from": setting.id,
-        "to"  : "land",
-        "body": {
-          "content" : "hello! land!"
-        }
-      });
-      let markdown = document.querySelector('#markdown')
-      setTimeout( console.log(markdown), 5000)
-    });
+    //   client.send("morning", {
+    //     "from": setting.id,
+    //     "to"  : "land",
+    //     "body": {
+    //       "content" : "hello! land!"
+    //     }
+    //   });
+    //   let markdown = document.querySelector('#markdown')
+    //   setTimeout( console.log(markdown), 5000)
+    // });
   </script>
   </body>
 </html>
