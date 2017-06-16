@@ -149,8 +149,6 @@ document.addEventListener 'DOMContentLoaded', ->
     ipc.on 'requestPdfOptions', (e, opts) -> sendPdfOptions(opts || {})
     ipc.on 'unfreeze', -> $('body').removeClass('to-pdf')
 
-
-
     # Initialize
     $(document).on 'click', 'a', (e) ->
       e.preventDefault()
@@ -216,9 +214,17 @@ document.addEventListener 'DOMContentLoaded', ->
     $(document).on 'sortstop', '.markdown-body', () ->
       console.log 'sort finished'
       # slideList update
+      tmp = slideList[selectedIndex].id
       slideList = []
       $('.slide_wrapper').each (idx, elem) ->
        slideList.push elem
+
+      #selectedIndex を更新する必要がある
+      for i in slideList
+        if(i.id == tmp)
+          selectedIndex = slideList.indexOf(i)
+      console.log slideList
+
 
 
 
