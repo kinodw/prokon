@@ -4,6 +4,9 @@ MdsMenu           = require './js/classes/mds_menu'
 clsMdsRenderer    = require './js/classes/mds_renderer'
 createValidator   = require 'codemirror-textlint'
 MdsRenderer       = new clsMdsRenderer
+fs                = require 'fs'
+PPTX              = require './js-pptx/lib/pptx'
+
 MdsRenderer.requestAccept()
 
 webFrame.setZoomLevelLimits(1, 1)
@@ -133,6 +136,84 @@ class EditorStates
   #********************************TODO****************************************
   insertVideo: (filePath) =>
     console.log filePath
+
+
+
+
+
+  loadFromPPTX: (filePath) =>
+    console.log filePath
+    INFILE = filePath;
+    fs.readFile INFILE, (err, data) =>
+      if (err)
+        throw err
+      pptx = new PPTX.Presentation()
+      pptx.load data, (err) =>
+        body = []
+
+        for i in [1...pptx.getSlideCount()]
+          slide = pptx.getSlide("slide#{i}")
+          console.log("title = " + pickUpTitleFromPPTX(slide))
+          console.log("body = " + pickUpBodyFromPPTX(slide))
+          body.push('# ' + pickUpTitleFromPPTX(slide) + '\n' + pickUpBodyFromPPTX(slide))
+
+        # #console.log body
+        @codeMirror.setValue(body.join("\n---\n"))
+        # #console.log JSON.stringify(body, null, ' ')
+
+  pickUpTitleFromPPTX = (slide) =>
+    title = [];
+    target = ar(slide);
+    #console.log(JSON.stringify(ap(slide), null, ' '));
+    for i in [0...target.length]
+        title.push(target[i]['a:t'])
+        console.log target[i]
+
+    return title.join('')
+
+  pickUpBodyFromPPTX = (slide) =>
+    body = [];
+    target = psp(slide)[1]['p:txBody'][0]['a:p'];
+    for i in [0...target.length]
+      pushed = "";
+      if(target[i]['a:r'] == null)
+        pushed = "";
+      else if (target[i]['a:pPr'])
+        pushed = "- ";
+      if(target[i]['a:r'])
+        tmp = [];
+        ar = target[i]['a:r'];
+
+        for k in [0...ar.length]
+          tmp.push(ar[k]['a:t']);
+        pushed = pushed + tmp.join('');
+      if(target[i]['a:endParaRPr'])
+        pushed = pushed + '\n';
+      body.push(pushed)
+    return body.join('')
+
+
+  ar = (slide) =>
+    return ap(slide)[0]['a:r'];
+
+  ap = (slide) =>
+
+    return ptxBody(slide)[0]['a:p'];
+  ptxBody = (slide) =>
+    return psp(slide)[0]['p:txBody'];
+
+  pspTree = (slide) =>
+    return pcSld(slide)[0]['p:spTree'];
+
+  psp = (slide) =>
+    return pspTree(slide)[0]['p:sp'];
+
+  pcSld = (slide) =>
+    return psld(slide)['p:cSld'];
+
+  psld = (slide) =>
+    return slide.content['p:sld'];
+
   #****************************************************************************
 
   # page毎に別れたコメントのリストを返す
@@ -259,7 +340,7 @@ do ->
          "async": true
       }
       extraKeys:
-        Enter: 'newlineAndIndentContinueMarkdownList'
+        #Enter: 'newlineAndIndentContinueMarkdownList'
     ),
     $('#preview')[0]
   )
@@ -280,8 +361,12 @@ do ->
     .on 'drop',      (e) =>
       e.preventDefault()
       return false unless (f = e.originalEvent.dataTransfer?.files?[0])?
-      console.log f
-      if f.type.startsWith('image')
+      # console.log f.type
+      # console.log f.path
+      # パワポの .pptxファイルだったら
+      if f.type == "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        editorStates.loadFromPPTX f.path
+      else if f.type.startsWith('image')
         editorStates.insertImage f.path
       else if f.type.startsWith('text') || f.type is ''
         MdsRenderer.sendToMain 'loadFromFile', f.path if f.path?
