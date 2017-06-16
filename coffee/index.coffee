@@ -139,10 +139,7 @@ class EditorStates
 
 
 
-
-
   loadFromPPTX: (filePath) =>
-    console.log filePath
     INFILE = filePath;
     fs.readFile INFILE, (err, data) =>
       if (err)
@@ -153,22 +150,25 @@ class EditorStates
 
         for i in [1...pptx.getSlideCount()]
           slide = pptx.getSlide("slide#{i}")
-          console.log("title = " + pickUpTitleFromPPTX(slide))
-          console.log("body = " + pickUpBodyFromPPTX(slide))
-          body.push('# ' + pickUpTitleFromPPTX(slide) + '\n' + pickUpBodyFromPPTX(slide))
+          console.log 'slide' + i
+          title = pickUpTitleFromPPTX(slide)
+          title = title.replace /\n/g, '\n# '
+          body.push('# ' + title + '\n' + pickUpBodyFromPPTX(slide))
 
         # #console.log body
-        @codeMirror.setValue(body.join("\n---\n"))
+        @codeMirror.setValue(body.join("\n\n---\n\n"))
         # #console.log JSON.stringify(body, null, ' ')
 
   pickUpTitleFromPPTX = (slide) =>
     title = [];
     target = ar(slide);
-    #console.log(JSON.stringify(ap(slide), null, ' '));
     for i in [0...target.length]
+      #console.log "title : " + target[i]['a:t']
+      if(target[i]['a:t'][0] == '')
+        title.push('\n')
+      else
         title.push(target[i]['a:t'])
-        console.log target[i]
-
+    console.log title
     return title.join('')
 
   pickUpBodyFromPPTX = (slide) =>
@@ -178,8 +178,10 @@ class EditorStates
       pushed = "";
       if(target[i]['a:r'] == null)
         pushed = "";
-      else if (target[i]['a:pPr'])
-        pushed = "- ";
+        body.push(pushed)
+        continue
+      else if target[i]['a:pPr'] and target[i]['a:r']
+        pushed = "\n- ";
       if(target[i]['a:r'])
         tmp = [];
         ar = target[i]['a:r'];
@@ -190,6 +192,7 @@ class EditorStates
       if(target[i]['a:endParaRPr'])
         pushed = pushed + '\n';
       body.push(pushed)
+      console.log pushed
     return body.join('')
 
 
@@ -340,7 +343,7 @@ do ->
          "async": true
       }
       extraKeys:
-        #Enter: 'newlineAndIndentContinueMarkdownList'
+        Enter: 'newlineAndIndentContinueMarkdownList'
     ),
     $('#preview')[0]
   )
