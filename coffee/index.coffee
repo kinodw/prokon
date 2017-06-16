@@ -138,7 +138,7 @@ class EditorStates
     console.log filePath
 
 
-
+  # .pptx ファイルをドラッグ＆ドロップでロード
   loadFromPPTX: (filePath) =>
     INFILE = filePath;
     fs.readFile INFILE, (err, data) =>
@@ -526,10 +526,9 @@ do ->
   #   console.log 'send textSend'
 
   $('#presentation').on 'click', () =>
-    # $('.pane.markdown').toggle()
-    # $('.toolbar-footer').toggle()
     webview.send 'requestSlideInfo'
     console.log 'send requestSlideInfo'
+
 
   webview.addEventListener 'ipc-message', (event) =>
      switch event.channel

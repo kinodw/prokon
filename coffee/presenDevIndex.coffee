@@ -220,6 +220,17 @@ do ->
     $('#comment').text(comment[id-1])
 
 
+  $("#t").timer({
+        action: 'start',
+        seconds: 0,
+        });
+  $('#button1').html("Pause");
+  state = "pause";
+  $("input[name='s']").attr("disabled", "disabled");
+  $("#t").addClass("badge-important");
+  $('#button1').removeClass("icon icon-play");
+  $('#button1').addClass('icon icon-pause')
+
 
   webview = document.querySelector('#preview')
 

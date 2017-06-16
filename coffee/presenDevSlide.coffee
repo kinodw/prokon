@@ -131,6 +131,7 @@ document.addEventListener 'DOMContentLoaded', ->
         # 選択されたスライドの色を変更し、　ページ遷移させる
         $('.slide_wrapper').css('backgroundColor', '')
         $(this).css('backgroundColor', '#ffe3b4')
+        selectedIndex = slideList.indexOf(this)
         $("html,body").animate({scrollTop:$(this).offset().top});
         # ページ移動メッセージ送信
         #ipc.sendToHost 'goToPage', $(this).attr('id')
