@@ -131,11 +131,16 @@ document.addEventListener 'DOMContentLoaded', ->
         # 選択されたスライドの色を変更し、　ページ遷移させる
         $('.slide_wrapper').css('backgroundColor', '')
         $(this).css('backgroundColor', '#ffe3b4')
-        selectedIndex = slideList.indexOf(this)
+        console.log slideList
+        for i,value of slideList
+          if(value.id == $(this).attr('id'))
+            selectedIndex = i
+        #selectedIndex = slideList.indexOf(this)
         $("html,body").animate({scrollTop:$(this).offset().top});
         # ページ移動メッセージ送信
         #ipc.sendToHost 'goToPage', $(this).attr('id')
         changeSlide($(this).attr('id'))
+        console.log selectedIndex
 
       ipc.sendToHost 'rendered', md
       ipc.sendToHost 'rulerChanged', md.rulers if md.rulerChanged
@@ -156,25 +161,27 @@ document.addEventListener 'DOMContentLoaded', ->
 
     $(document).keydown (e) ->
       if e.keyCode == 38
-        console.log 'up key'
+        #console.log 'up key'
         nextPageIndex = (selectedIndex + (slideList.length-1)) % slideList.length
         nextPageId    = slideList[nextPageIndex].id
-        console.log 'next id = ' + nextPageId
+        #console.log 'next id = ' + nextPageId
         $('.slide_wrapper').css('backgroundColor', '')
         $("##{nextPageId}").css('backgroundColor', '#ffe3b4')
         selectedIndex = nextPageIndex
+        console.log selectedIndex
         #ipc.sendToHost 'goToPage', nextPageId
         changeSlide(nextPageId)
         $("html,body").animate({scrollTop:$("##{nextPageId}").offset().top});
 
       if e.keyCode == 40
-        console.log 'down key'
+        #console.log 'down key'
         nextPageIndex = (selectedIndex + 1) % slideList.length
         nextPageId    = slideList[nextPageIndex].id
-        console.log 'next id = ' + nextPageId
+        #console.log 'next id = ' + nextPageId
         $('.slide_wrapper').css('backgroundColor', '')
         $("##{nextPageId}").css('backgroundColor', '#ffe3b4')
         selectedIndex = nextPageIndex
+        console.log selectedIndex
         #ipc.sendToHost 'goToPage', nextPageId
         changeSlide(nextPageId)
         $("html,body").animate({scrollTop:$("##{nextPageId}").offset().top});
@@ -212,18 +219,18 @@ document.addEventListener 'DOMContentLoaded', ->
     }
     $('.markdown-body').disableSelection()
     $(document).on 'sortstop', '.markdown-body', () ->
-      console.log 'sort finished'
+      #console.log 'sort finished'
       # slideList update
-      tmp = slideList[selectedIndex].id
+      tmp = slideList[selectedIndex]
       slideList = []
       $('.slide_wrapper').each (idx, elem) ->
        slideList.push elem
 
       #selectedIndex を更新する必要がある
       for i in slideList
-        if(i.id == tmp)
+        if(i == tmp)
           selectedIndex = slideList.indexOf(i)
-      console.log slideList
+      console.log selectedIndex
 
 
 
