@@ -29,7 +29,6 @@ class EditorStates
   _imageDirectory: null
 
   constructor: (@codeMirror, @preview) ->
-    console.log "#{__dirname}"
     @initializeEditor()
     @initializePreview()
 

@@ -9,9 +9,11 @@ fs             = require 'fs'
 jschardet      = require 'jschardet'
 iconv_lite     = require 'iconv-lite'
 Path           = require 'path'
+MickrClient    = require '../../modules/MickrClient'
 
 module.exports = class MdsWindow
   @appWillQuit: false
+  @client = null
 
   @defOptions: () ->
     title:  'Electron'
@@ -34,6 +36,13 @@ module.exports = class MdsWindow
   viewMode: null
 
   constructor: (fileOpts = {}, @options = {}) ->
+    setting =
+      "id": "window"
+      "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+      "site": "test"
+      "token": "Pad:9948"
+    @client = new MickrClient(setting)
+
     @path = fileOpts?.path || null
 
     # @viewMode = global.marp.config.get('viewMode')
@@ -176,9 +185,9 @@ module.exports = class MdsWindow
       return if @changed and dialog.showMessageBox(@browserWindow,
         type: 'question'
         buttons: ['OK', 'Cancel']
-        title: 'Marp'
+        title: ''
         message: 'Are you sure?'
-        detail: 'You will lose your changes on Marp. Reopen anyway?')
+        detail: 'You will lose your changes. Reopen anyway?')
 
       @loadFromFile @path, extend({ override: true }, options)
 
@@ -199,15 +208,61 @@ module.exports = class MdsWindow
       fs.writeFile fileName, data, (err) =>
         unless err
           console.log "Write file to #{fileName}."
+          # delete markdown # and ---
+          tmp  = data
+          tmp = tmp.replace(/---/g, '')
+          tmp = tmp.replace(/\n/g, '')
+          tmp = tmp.replace(/^######/g,'')
+          tmp = tmp.replace(/^#####/g,'')
+          tmp = tmp.replace(/^####/g,'')
+          tmp = tmp.replace(/^###/g,'')
+          tmp = tmp.replace(/^##/g,'')
+          tmp = tmp.replace(/^#/g,'')
+          input = []
+          input.push(tmp)
+          console.log input
+          fileNameList = fileName.split('/')
+          file = fileNameList[fileNameList.length-1]
+          console.log file
+
+          # python プロセス生成、そして結果を受け取る
+          spawn = require('child_process').spawn
+          py    = spawn('python', ["#{__dirname}/../../compute_input.py"])
+          dataString = ''
+
+          py.stdout.on 'data', (data) =>
+            dataString += data.toString()
+
+          py.stdout.on 'end', () =>
+            dataString = dataString.slice(2)
+            console.log dataString
+            dataString = dataString.slice(0,dataString.length-3)
+            console.log dataString
+            filepath = Path.join "/Users/hikaru/Desktop", "slide", dataString, file
+            fs.writeFile filepath, data, (err) =>
+              if err
+                console.log err
+              unless err
+                console.log "Write file to #{filepath}"
+                # 分類結果 雲で表示
+                @client.send 'show', {
+                  "to": "land"
+                  "body":
+                    "content": dataString
+                }
+
+          py.stdin.write(JSON.stringify(input));
+          py.stdin.end()
+
           @trigger triggers.succeeded if triggers.succeeded?
         else
           console.log err
-          dialog.showMessageBox @browserWindow,
-            type: 'error'
-            buttons: ['OK']
-            title: 'Marp'
-            message: "Marp cannot write the file to #{fileName}."
-            detail: err.toString()
+          # dialog.showMessageBox @browserWindow,
+          #   type: 'error'
+          #   buttons: ['OK']
+          #   title: 'Marp'
+          #   message: "Marp cannot write the file to #{fileName}."
+          #   detail: err.toString()
 
           MdsWindow.appWillQuit = false
           @trigger triggers.failed, err if triggers.failed?

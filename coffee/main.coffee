@@ -132,22 +132,6 @@ ipc.on 'textSend', (e, text) =>
   input.push(nonHTML)
 
 
-  # python プロセス生成、そして結果を受け取る
-  spawn = require('child_process').spawn
-  py    = spawn('python', ["#{__dirname}/../compute_input.py"])
-  data = input
-  dataString = ''
-
-  py.stdout.on 'data', (data) =>
-    dataString += data.toString()
-
-  py.stdout.on 'end', () =>
-     console.log dataString
-     # 分類結果 雲で表示
-     mickrWin.getMainWindow().webContents.send 'show', dataString
-
-  py.stdin.write(JSON.stringify(data));
-  py.stdin.end()
 
 # ipc.on 'requestSlideInfo', () =>
 #   console.log 'receive requestSlideInfo'

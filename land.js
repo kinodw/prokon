@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
   const client = new MickrClient(setting);
   // 確認用
   var cloud = sky.addCloud({text: "もくもく",});
-  ipc.on('show', (e,data) => {
+  client.on('show', (e,data) => {
     console.log(data)
-    sky.addCloud({text: data});
+    sky.addCloud({text: data.body.content});
   });
   // client.on("morning", () =>{
   //   // inde.htmlにメッセージ送信
