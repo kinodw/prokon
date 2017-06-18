@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css" />
     <link rel="stylesheet" href="./node_modules/codemirror/addon/lint/lint.css">
     <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/anotherIndex.css">
   </head>
 
   <body>
@@ -35,14 +36,20 @@
               <span class="icon icon-doc-text"></span>
             </button>
           </div>
-
           <button class="btn btn-default pdfexport-btn" id="pdf-export">
             <span class="icon icon-export icon-text"></span>
             PDF
           </button>
-          <button type="button" id="presentation" name="aaa" value="aaa">
-            <font size="4">presen</font></font>
+          <button class="btn btn-default" id="toggleUsedSlide">
+            <span class="icon icon-popup"></span>
           </button>
+          <button class="btn btn-default" id="presentation">
+            presen
+          </button>
+          <button class="btn btn-default" id="loadUsedSlide">
+            loadUsedSlide
+          </button>
+
           <span id="page-indicator"></span>
       </div>
     </header>
@@ -50,6 +57,9 @@
         <div class="pane-group">
           <div class="pane markdown">
             <textarea id="editor" wrap="soft"></textarea>
+            <webview id="preview1" autosize="on"  preload="./js/usedSlide.js"
+             src="usedSlide.html" blinkFeatures="CSSVariables"></webview>
+
             <div class="pane-splitter left"></div>
           </div>
           <div class="pane preview">

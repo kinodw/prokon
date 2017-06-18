@@ -211,4 +211,18 @@ img.emoji
       > .slide
         transform: scale(calc(#{$presenDevPreviewWidth} / var(--slide-width)))
 
+  &.usedSlide
+
+    .markdown-body
+      display:flex !important
+
+    .slide_wrapper
+      width: $presenDevPreviewWidthPx
+      height: calc(#{$presenDevPreviewWidthPx} * var(--slide-height) / var(--slide-width))
+      overflow: visible
+      &:first-child
+
+      > .slide
+        transform: scale(calc(#{$presenDevPreviewWidth} / var(--slide-width)))
+
 

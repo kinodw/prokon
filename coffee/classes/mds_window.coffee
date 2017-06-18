@@ -57,6 +57,7 @@ module.exports = class MdsWindow
       })
       @_window_id = bw.id
 
+
       loadCmp = (details) =>
         setTimeout =>
           @_watchingResources.delete(details.id)
@@ -209,50 +210,51 @@ module.exports = class MdsWindow
         unless err
           console.log "Write file to #{fileName}."
           # delete markdown # and ---
-          tmp  = data
-          tmp = tmp.replace(/---/g, '')
-          tmp = tmp.replace(/\n/g, '')
-          tmp = tmp.replace(/^######/g,'')
-          tmp = tmp.replace(/^#####/g,'')
-          tmp = tmp.replace(/^####/g,'')
-          tmp = tmp.replace(/^###/g,'')
-          tmp = tmp.replace(/^##/g,'')
-          tmp = tmp.replace(/^#/g,'')
-          input = []
-          input.push(tmp)
-          console.log input
-          fileNameList = fileName.split('/')
-          file = fileNameList[fileNameList.length-1]
-          console.log file
+          if(typeof data == 'string')
+            tmp  = data
+            tmp = tmp.replace(/---/g, '')
+            tmp = tmp.replace(/\n/g, '')
+            tmp = tmp.replace(/^######/g,'')
+            tmp = tmp.replace(/^#####/g,'')
+            tmp = tmp.replace(/^####/g,'')
+            tmp = tmp.replace(/^###/g,'')
+            tmp = tmp.replace(/^##/g,'')
+            tmp = tmp.replace(/^#/g,'')
+            input = []
+            input.push(tmp)
+            console.log input
+            fileNameList = fileName.split('/')
+            file = fileNameList[fileNameList.length-1]
+            console.log file
 
-          # python プロセス生成、そして結果を受け取る
-          spawn = require('child_process').spawn
-          py    = spawn('python', ["#{__dirname}/../../compute_input.py"])
-          dataString = ''
+            # python プロセス生成、そして結果を受け取る
+            spawn = require('child_process').spawn
+            py    = spawn('python', ["#{__dirname}/../../compute_input.py"])
+            dataString = ''
 
-          py.stdout.on 'data', (data) =>
-            dataString += data.toString()
+            py.stdout.on 'data', (data) =>
+              dataString += data.toString()
 
-          py.stdout.on 'end', () =>
-            dataString = dataString.slice(2)
-            console.log dataString
-            dataString = dataString.slice(0,dataString.length-3)
-            console.log dataString
-            filepath = Path.join "/Users/hikaru/Desktop", "slide", dataString, file
-            fs.writeFile filepath, data, (err) =>
-              if err
-                console.log err
-              unless err
-                console.log "Write file to #{filepath}"
-                # 分類結果 雲で表示
-                @client.send 'show', {
-                  "to": "land"
-                  "body":
-                    "content": dataString
-                }
+            py.stdout.on 'end', () =>
+              dataString = dataString.slice(2)
+              console.log dataString
+              dataString = dataString.slice(0,dataString.length-3)
+              console.log dataString
+              filepath = Path.join "/Users/hikaru/Desktop", "slide", dataString, file
+              fs.writeFile filepath, data, (err) =>
+                if err
+                  console.log err
+                unless err
+                  console.log "Write file to #{filepath}"
+                  # 分類結果 雲で表示
+                  @client.send 'show', {
+                    "to": "land"
+                    "body":
+                      "content": dataString
+                  }
 
-          py.stdin.write(JSON.stringify(input));
-          py.stdin.end()
+            py.stdin.write(JSON.stringify(input));
+            py.stdin.end()
 
           @trigger triggers.succeeded if triggers.succeeded?
         else

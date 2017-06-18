@@ -2,7 +2,7 @@ global.marp or=
   config: require './classes/mds_config'
   development: false
 
-{BrowserWindow, app}     = require 'electron'
+{BrowserWindow, app, dialog }     = require 'electron'
 Path      = require 'path'
 MdsWindow = require './classes/mds_window'
 MdsPresenWindow = require './classes/mds_presen_window'
@@ -12,11 +12,21 @@ MainMenu  = require './classes/mds_main_menu'
 electron  = require 'electron'
 ipc       = electron.ipcMain
 MickrWindow = require '../MickrWindow.js'
+MickrClient = require '../modules/MickrClient'
 Tray      = electron.Tray
 globalShortcut = electron.globalShortcut
 powerSaveBlocker = electron.powerSaveBlocker
+fs        = require 'fs'
+
 # app.commandLine.appendSwitch("--enable-experimental-web-platform-features");
 # about presentation
+setting =
+     "id": "main"
+     "url": "ws://apps.wisdomweb.net:64260/ws/mik"
+     "site": "test"
+     "token": "Pad:9948"
+client = new MickrClient(setting);
+
 slideInfo = ""
 presenDevWin = null
 win = null
@@ -65,7 +75,6 @@ app.on 'open-file', (e, path) ->
 
 app.on 'ready', ->
   # mickr のウインドウ
-
   mickrWin = new MickrWindow()
   mickrWin.activateMainWindows()
   #/* メニューバー上のアイコンが押された場合の処理 */
@@ -86,7 +95,6 @@ app.on 'ready', ->
       MdsWindow.loadFromFile opts.file, null
     else
       win = new MdsWindow
-
  # receive Text
 ipc.on 'textSend', (e, text) =>
   console.log 'receive textSend'
@@ -131,6 +139,23 @@ ipc.on 'textSend', (e, text) =>
   input = []
   input.push(nonHTML)
 
+ ipc.on 'loadUsedSlide', () ->
+    console.log 'receive loadUsedSlide'
+    args = [
+          {
+            title: 'Open'
+            filters: [
+              { name: 'Markdown files', extensions: ['md', 'mdown'] }
+              { name: 'Text file', extensions: ['txt'] }
+              { name: 'All files', extensions: ['*'] }
+            ]
+            properties: ['openFile', 'createDirectory']
+          }
+          (fnames) ->
+            return unless fnames?
+            win.browserWindow.webContents.send 'sendUsedSlidePath', fnames[0]
+        ]
+    dialog.showOpenDialog.apply win, args
 
 
 # ipc.on 'requestSlideInfo', () =>

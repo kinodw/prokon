@@ -1,5 +1,6 @@
 #t {
-    display: inline;
+    /*display: inline;*/
+    font-size:-webkit-xxx-large;
 }
 
 #comment-wrapper{
@@ -20,7 +21,7 @@
 }
 
 .pane.markdown{
-    height:80%;
+    height:90%;
 }
 
 #comment {

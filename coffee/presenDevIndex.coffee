@@ -215,21 +215,19 @@ do ->
     "body":
       "content": ""
     }
+
   client.on "changeComment", (e,data) =>
     id = data.body.content
     $('#comment').text(comment[id-1])
 
-
+  # presenDevウインドウが開いたら、そこでタイマー開始
   $("#t").timer({
         action: 'start',
         seconds: 0,
         });
-  $('#button1').html("Pause");
-  state = "pause";
-  $("input[name='s']").attr("disabled", "disabled");
   $("#t").addClass("badge-important");
-  $('#button1').removeClass("icon icon-play");
-  $('#button1').addClass('icon icon-pause')
+  $('#btn1').removeClass("icon icon-play");
+  $('#btn1').addClass('icon icon-pause')
 
 
   webview = document.querySelector('#preview')

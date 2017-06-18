@@ -528,6 +528,28 @@ do ->
     webview.send 'requestSlideInfo'
     console.log 'send requestSlideInfo'
 
+  state = 0;
+  $('#loadUsedSlide').on 'click', () =>
+    console.log 'load file'
+    ipc.send 'loadUsedSlide'
+    if state == 0
+      $('.CodeMirror').css 'height', '65%'
+      state = 1
+
+  $('#toggleUsedSlide').on 'click', () =>
+    if state == 0
+      $('.CodeMirror').css 'height', '65%'
+      state = 1
+    else
+      $('.CodeMirror').css 'height', '100%'
+      state = 0
+
+  ipc.on 'sendUsedSlidePath', (e, txt) =>
+    console.log "usedSlidePath = " + txt
+    webviewUsedSlide = document.querySelector('#preview1')
+    #webviewUsedSlide.openDevTools()
+    webviewUsedSlide.send 'sendUsedSlidePath', txt
+
 
   webview.addEventListener 'ipc-message', (event) =>
      switch event.channel
