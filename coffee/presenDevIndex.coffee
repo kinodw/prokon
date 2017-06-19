@@ -221,6 +221,7 @@ do ->
     $('#comment').text(comment[id-1])
 
   # presenDevウインドウが開いたら、そこでタイマー開始
+
   $("#t").timer({
         action: 'start',
         seconds: 0,
@@ -228,6 +229,7 @@ do ->
   $("#t").addClass("badge-important");
   $('#btn1').removeClass("icon icon-play");
   $('#btn1').addClass('icon icon-pause')
+
 
 
   webview = document.querySelector('#preview')

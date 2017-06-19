@@ -70,7 +70,7 @@ class EditorStates
       @currentPage = page
       @preview.send 'currentPage', @currentPage if @previewInitialized
 
-    $('#page-indicator').text "Page #{@currentPage} / #{@rulers.length + 1}"
+    $('#page-indicator').text " #{@currentPage} / #{@rulers.length + 1}"
 
   initializePreview: =>
     $(@preview)
@@ -160,55 +160,61 @@ class EditorStates
 
   pickUpTitleFromPPTX = (slide) =>
     title = [];
-    target = ar(slide);
-    for i in [0...target.length]
-      #console.log "title : " + target[i]['a:t']
-      if(target[i]['a:t'][0] == '')
-        title.push('\n')
-      else
-        title.push(target[i]['a:t'])
-    console.log title
-    return title.join('')
+    if psp(slide)[0]['p:txBody']?
+      target = ar(slide);
+      for i in [0...target.length]
+        #console.log "title : " + target[i]['a:t']
+        if(target[i]['a:t'][0] == '')
+          title.push('\n')
+        else
+          title.push(target[i]['a:t'])
+      console.log "title = " + title
+      return title.join('')
+    else
+      return ''
 
   pickUpBodyFromPPTX = (slide) =>
     body = [];
-    target = psp(slide)[1]['p:txBody'][0]['a:p'];
-    for i in [0...target.length]
-      pushed = "";
-      if(target[i]['a:r'] == null)
+    if psp(slide)[1]? # bodyが無い場合にエラーが発生するので、その回避
+      target = psp(slide)[1]['p:txBody'][0]['a:p'];
+      for i in [0...target.length]
         pushed = "";
-        body.push(pushed)
-        continue
-      else if target[i]['a:pPr'] and target[i]['a:r']
-        pushed = "\n- ";
-      if(target[i]['a:r'])
-        tmp = [];
-        ar = target[i]['a:r'];
+        if(target[i]['a:r'] == null)
+          pushed = "";
+          body.push(pushed)
+          continue
+        else if target[i]['a:pPr'] and target[i]['a:r']
+          pushed = "\n- ";
+        if(target[i]['a:r'])
+          tmp = [];
+          ar = target[i]['a:r'];
 
-        for k in [0...ar.length]
-          tmp.push(ar[k]['a:t']);
-        pushed = pushed + tmp.join('');
-      if(target[i]['a:endParaRPr'])
-        pushed = pushed + '\n';
-      body.push(pushed)
-      console.log pushed
-    return body.join('')
+          for k in [0...ar.length]
+            tmp.push(ar[k]['a:t']);
+          pushed = pushed + tmp.join('');
+        if(target[i]['a:endParaRPr'])
+          pushed = pushed + '\n';
+        body.push(pushed)
+        console.log "body = " + pushed
+      return body.join('')
+    else
+      return ''
 
 
   ar = (slide) =>
     return ap(slide)[0]['a:r'];
 
   ap = (slide) =>
-
     return ptxBody(slide)[0]['a:p'];
+
   ptxBody = (slide) =>
     return psp(slide)[0]['p:txBody'];
 
-  pspTree = (slide) =>
-    return pcSld(slide)[0]['p:spTree'];
-
   psp = (slide) =>
     return pspTree(slide)[0]['p:sp'];
+
+  pspTree = (slide) =>
+    return pcSld(slide)[0]['p:spTree'];
 
   pcSld = (slide) =>
     return psld(slide)['p:cSld'];
