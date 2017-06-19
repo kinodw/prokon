@@ -8,14 +8,13 @@ document.addEventListener('DOMContentLoaded', (e) => {
     "url": "ws://apps.wisdomweb.net:64260/ws/mik",
     "site": "test",
     "token": "Pad:9948",
-    "to"  : "index"
   };
   const client = new MickrClient(setting);
   // 確認用
-  var cloud = sky.addCloud({text: "もくもく",});
+  var cloud = sky.addCloud({text: "もくもく", color: '#ffe3b4'});
   client.on('show', (e,data) => {
     console.log(data)
-    sky.addCloud({text: data.body.content});
+    sky.addCloud({text: "backup -> " + data.body.content});
   });
   // client.on("morning", () =>{
   //   // inde.htmlにメッセージ送信
