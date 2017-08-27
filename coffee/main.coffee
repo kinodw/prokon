@@ -109,11 +109,14 @@ ipc.on 'textSend', (e, text) =>
     if (i.bounds.x != 0 || i.bounds.y != 0)
       externalDisplay = i
       break
+  console.log 'externalDisplay = ' + externalDisplay
   #　外部ディスプレイが存在する場合
   if (externalDisplay)
-    @presenWin = new MdsPresenWindow
-      x: externalDisplay.bounds.x + 50,
+    console.log externalDisplay.bounds
+    @presenWin = new MdsPresenWindow {},
+      x: externalDisplay.bounds.x + 50
       y: externalDisplay.bounds.y + 50
+      fullscreen: true
   # 外部ディスプレイが存在しない場合
   else
     @presenWin = new MdsPresenWindow

@@ -18,6 +18,7 @@ module.exports = class PresenWindow extends MdsWindow
   constructor: (fileOpts = {}, @options = {}, slideHTML) ->
         @path = fileOpts?.path || null
         slide = slideHTML
+        console.log "@options = " + JSON.stringify(@options, null, ' ')
 
         #@viewMode = global.marp.config.get('viewMode')
 
@@ -25,9 +26,8 @@ module.exports = class PresenWindow extends MdsWindow
 
         @browserWindow = do =>
           # 初期設定options と @options をマージして初期化、ウインドウID設定
-          bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options,{
-                'titleBarStyle': 'hidden'
-            })
+          bw = new BrowserWindow extend(true, {}, MdsWindow.defOptions(), @options,
+            "titleBarStyle": "hidden")
           @_window_id = bw.id
 
           loadCmp = (details) =>
@@ -63,7 +63,6 @@ module.exports = class PresenWindow extends MdsWindow
             @send 'setEditorConfig', global.marp.config.get('editor')
             @trigger 'load', fileOpts?.buffer || '', @path
             bw.webContents.send 'presenDevInitialize', slide
-
 
           bw.once 'ready-to-show', => bw.show()
 

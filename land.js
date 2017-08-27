@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', (e) => {
   };
   const client = new MickrClient(setting);
   // 確認用
-  var cloud = sky.addCloud({text: "もくもく", color: '#ffe3b4'});
+  //var cloud = sky.addCloud({text: "もくもく", color: '#ffe3b4'});
   client.on('show', (e,data) => {
     console.log(data)
-    sky.addCloud({text: "backup -> " + data.body.content});
+    sky.addCloud({text: "backup -> \n" + data.body.content, color:'#ffe3b4' });
   });
   // client.on("morning", () =>{
   //   // inde.htmlにメッセージ送信

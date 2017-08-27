@@ -98,15 +98,15 @@ module.exports = class MdsMainMenu
                 args.unshift w.mdsWindow.browserWindow if w?.mdsWindow?.browserWindow?
                 dialog.showOpenDialog.apply @, args
             }
-            {
-              label: 'Open &Recent'
-              submenu: [{ replacement: 'fileHistory' }]
-            }
-            {
-              label: 'Reopen with Encoding'
-              enabled: !!@window?.mdsWindow?.path
-              submenu: [{ replacement: 'encodings' }]
-            }
+            # {
+            #   label: 'Open &Recent'
+            #   submenu: [{ replacement: 'fileHistory' }]
+            # }
+            # {
+            #   label: 'Reopen with Encoding'
+            #   enabled: !!@window?.mdsWindow?.path
+            #   submenu: [{ replacement: 'encodings' }]
+            # }
             { label: '&Save', enabled: @window?, accelerator: 'CmdOrCtrl+S', click: => @window.mdsWindow.trigger 'save' }
             { label: 'Save &As...', enabled: @window?, click: => @window.mdsWindow.trigger 'saveAs' }
             { type: 'separator' }
