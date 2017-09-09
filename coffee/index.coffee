@@ -6,6 +6,11 @@ createValidator   = require 'codemirror-textlint'
 MdsRenderer       = new clsMdsRenderer
 fs                = require 'fs'
 PPTX              = require './js-pptx/lib/pptx'
+{readFile}        = require './js/classes/mds_file'
+PDF2Images         = require  'pdf2images-multiple'
+execSync = require('child_process').execSync;
+
+
 
 MdsRenderer.requestAccept()
 
@@ -18,6 +23,9 @@ require 'codemirror/mode/gfm/gfm'
 require 'codemirror/addon/edit/continuelist'
 require "codemirror/addon/lint/lint"
 MickrClient = require './modules/MickrClient'
+
+
+
 
 class EditorStates
   rulers: []
@@ -136,6 +144,26 @@ class EditorStates
   insertVideo: (filePath) =>
     console.log filePath
 
+  loadFromPDF: (filePath) =>
+    pdf2images = PDF2Images filePath,
+      output_dir: './media/'
+
+    pdf2images.pdf.convert (err, image_path) =>
+      if(err)
+        console.log err
+     # console.log image_path
+    ,(err, image_paths) =>
+      image_paths.sort (a, b) ->
+        fileNumber_a = a.match(".*-([0-9]+)")[1]
+        fileNumber_b = b.match(".*-([0-9]+)")[1]
+        return fileNumber_a - fileNumber_b
+     # image_paths.reverse
+      console.log image_paths
+      for value, index in image_paths
+        @codeMirror.replaceSelection("![](#{value.replace(/ /g, '%20')})\n\n---\n")
+    # fileName: 拡張子を含まないファイル名
+    # = filePath.match(".+/(.+?)\.[a-z]+([\?#;].*)?$")[1]
+    #readFile("#{fileName}.html")
 
   # .pptx ファイルをドラッグ＆ドロップでロード
   loadFromPPTX: (filePath) =>
@@ -150,6 +178,7 @@ class EditorStates
         for i in [1...pptx.getSlideCount()]
           slide = pptx.getSlide("slide#{i}")
           console.log 'slide' + i
+          console.log(slide)
           title = pickUpTitleFromPPTX(slide)
           title = title.replace /\n/g, '\n# '
           body.push('# ' + title + '\n' + pickUpBodyFromPPTX(slide))
@@ -369,8 +398,8 @@ do ->
     .on 'drop',      (e) =>
       e.preventDefault()
       return false unless (f = e.originalEvent.dataTransfer?.files?[0])?
-      # console.log f.type
-      # console.log f.path
+      console.log f.type
+      #console.log f.path
       # パワポの .pptxファイルだったら
       if f.type == "application/vnd.openxmlformats-officedocument.presentationml.presentation"
         editorStates.loadFromPPTX f.path
@@ -380,7 +409,8 @@ do ->
         MdsRenderer.sendToMain 'loadFromFile', f.path if f.path?
       else if f.type.startsWith('video')
         editorStates.insertVideo f.path
-
+      else if f.type == 'application/pdf'
+        editorStates.loadFromPDF f.path
       false
 
   # Splitter
@@ -534,21 +564,21 @@ do ->
     webview.send 'requestSlideInfo'
     console.log 'send requestSlideInfo'
 
-  state = 0;
-  $('#loadUsedSlide').on 'click', () =>
-    console.log 'load file'
-    ipc.send 'loadUsedSlide'
-    if state == 0
-      $('.CodeMirror').css 'height', '65%'
-      state = 1
+  # state = 0;
+  # $('#loadUsedSlide').on 'click', () =>
+  #   console.log 'load file'
+  #   ipc.send 'loadUsedSlide'
+  #   if state == 0
+  #     $('.CodeMirror').css 'height', '65%'
+  #     state = 1
 
-  $('#toggleUsedSlide').on 'click', () =>
-    if state == 0
-      $('.CodeMirror').css 'height', '65%'
-      state = 1
-    else
-      $('.CodeMirror').css 'height', '100%'
-      state = 0
+  # $('#toggleUsedSlide').on 'click', () =>
+  #   if state == 0
+  #     $('.CodeMirror').css 'height', '65%'
+  #     state = 1
+  #   else
+  #     $('.CodeMirror').css 'height', '100%'
+  #     state = 0
 
   ipc.on 'sendUsedSlidePath', (e, txt) =>
     console.log "usedSlidePath = " + txt

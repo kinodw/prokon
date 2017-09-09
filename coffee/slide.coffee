@@ -151,6 +151,11 @@ document.addEventListener 'DOMContentLoaded', ->
 
     # markdownBodyをオブジェクトで送信するVer
 
+    ipc.on 'loadFromPDF', (e, fileName) =>
+      console.log 'loadFromPDF'
+      console.log fileName
+      $('#markdown').load("#{fileName}.html")
+
     ipc.on 'requestSlideInfo', () =>
       console.log 'receive requestSlideInfo'
       markdownBody = []

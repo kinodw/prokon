@@ -110,6 +110,14 @@ ipc.on 'textSend', (e, text) =>
       externalDisplay = i
       break
   console.log 'externalDisplay = ' + externalDisplay
+
+  # # デモ撮影用
+  # console.log externalDisplay.bounds
+  # @presenWin = new MdsPresenWindow {},
+  #   x: externalDisplay.bounds.x + 50
+  #   y: externalDisplay.bounds.y + 50
+
+  # 通常版
   #　外部ディスプレイが存在する場合
   if (externalDisplay)
     console.log externalDisplay.bounds
@@ -117,48 +125,50 @@ ipc.on 'textSend', (e, text) =>
       x: externalDisplay.bounds.x + 50
       y: externalDisplay.bounds.y + 50
       fullscreen: true
+
   # 外部ディスプレイが存在しない場合
   else
     @presenWin = new MdsPresenWindow
       width:800
       height: 600
-  # text には、slide_wrapperのHTML要素がid順に入っている
-  @slideInfo = text
-  nonHTML = []
 
-  # htmlタグ削除 & 文字列の形を整える
-  for idx, value of text
-    nonHTML[idx] = value.replace(/<(".*?"|'.*?'|[^'"])*?>/gi, " ")    # HTMLタグ消去
-    nonHTML[idx] = nonHTML[idx].replace(/\n/gi, "")  # 改行文字の削除
-    nonHTML[idx] = nonHTML[idx].replace(/\s+/gi, "") # 空白の削除
-    nonHTML[idx] = nonHTML[idx].substr(0, nonHTML[idx].length-1)  # 末尾にページ数が入るので、末尾を削除
+  # # text には、slide_wrapperのHTML要素がid順に入っている
+  # @slideInfo = text
+  # nonHTML = []
 
-  # htmlタグを含まない本文
-  console.log nonHTML
-  # それぞれのスライドのテキストを結合し、リストに一つの要素として入れて
-  # 、それをpythonに渡す
-  nonHTML = nonHTML.join("")
-  console.log nonHTML
-  input = []
-  input.push(nonHTML)
+  # # htmlタグ削除 & 文字列の形を整える
+  # for idx, value of text
+  #   nonHTML[idx] = value.replace(/<(".*?"|'.*?'|[^'"])*?>/gi, " ")    # HTMLタグ消去
+  #   nonHTML[idx] = nonHTML[idx].replace(/\n/gi, "")  # 改行文字の削除
+  #   nonHTML[idx] = nonHTML[idx].replace(/\s+/gi, "") # 空白の削除
+  #   nonHTML[idx] = nonHTML[idx].substr(0, nonHTML[idx].length-1)  # 末尾にページ数が入るので、末尾を削除
 
- ipc.on 'loadUsedSlide', () ->
-    console.log 'receive loadUsedSlide'
-    args = [
-          {
-            title: 'Open'
-            filters: [
-              { name: 'Markdown files', extensions: ['md', 'mdown'] }
-              { name: 'Text file', extensions: ['txt'] }
-              { name: 'All files', extensions: ['*'] }
-            ]
-            properties: ['openFile', 'createDirectory']
-          }
-          (fnames) ->
-            return unless fnames?
-            win.browserWindow.webContents.send 'sendUsedSlidePath', fnames[0]
-        ]
-    dialog.showOpenDialog.apply win, args
+  # # htmlタグを含まない本文
+  # console.log nonHTML
+  # # それぞれのスライドのテキストを結合し、リストに一つの要素として入れて
+  # # 、それをpythonに渡す
+  # nonHTML = nonHTML.join("")
+  # console.log nonHTML
+  # input = []
+  # input.push(nonHTML)
+
+ # ipc.on 'loadUsedSlide', () ->
+ #    console.log 'receive loadUsedSlide'
+ #    args = [
+ #          {
+ #            title: 'Open'
+ #            filters: [
+ #              { name: 'Markdown files', extensions: ['md', 'mdown'] }
+ #              { name: 'Text file', extensions: ['txt'] }
+ #              { name: 'All files', extensions: ['*'] }
+ #            ]
+ #            properties: ['openFile', 'createDirectory']
+ #          }
+ #          (fnames) ->
+ #            return unless fnames?
+ #            win.browserWindow.webContents.send 'sendUsedSlidePath', fnames[0]
+ #        ]
+ #    dialog.showOpenDialog.apply win, args
 
 
 # ipc.on 'requestSlideInfo', () =>
